@@ -9,9 +9,10 @@ import (
 	"go/token"
 	"os"
 	"os/exec"
+	"reflect"
+	"strconv"
 	"strings"
 	"text/template"
-
 )
 
 type Schema struct {
@@ -94,11 +95,30 @@ func scan(scanPath string) []*Schema {
 						Type:       field.Type.(*ast.Ident).Name,
 					}
 					if field != nil {
-						cols.Tag = field.Tag.Value
+						cols.Tag = strings.TrimRight(field.Tag.Value, " ")
+						tagStr, err := strconv.Unquote(cols.Tag)
+						if err != nil {
+							panic(err)
+						}
+						tv := reflect.StructTag(tagStr)
+						value, ok := tv.Lookup("db")
+						if ok {
+							for _, valueStr := range strings.Split(value, ";") {
+								if valueStr == "primary" {
+									tmpSchema.Primary = cols
+								}
+								if valueStr == "index" {
+									cols.IsIndex = true
+								}
+								if valueStr == "shard" {
+									tmpSchema.ShardCols = cols
+								}
+							}
+						}
+
 					}
 					tmpSchema.Cols = append(tmpSchema.Cols, cols)
 				}
-				tmpSchema.Primary = tmpSchema.Cols[0]
 				if tmpSchema.Shard > 0 && tmpSchema.ShardCols == nil {
 					panic(errors.New(fmt.Sprintf("schema %s set shard=%d but no set shard field", tmpSchema.Name, tmpSchema.Shard)))
 				}
