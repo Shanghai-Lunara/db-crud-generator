@@ -34,6 +34,14 @@ type Cols struct {
 	IsIndex    bool
 }
 
+const (
+	tagKey = "db"
+
+	tagPrimary = "primary"
+	tagIndex   = "index"
+	tagShard   = "shard"
+)
+
 var templateFile string
 var projectName string
 
@@ -101,16 +109,16 @@ func scan(scanPath string) []*Schema {
 							panic(err)
 						}
 						tv := reflect.StructTag(tagStr)
-						value, ok := tv.Lookup("db")
+						value, ok := tv.Lookup(tagKey)
 						if ok {
 							for _, valueStr := range strings.Split(value, ";") {
-								if valueStr == "primary" {
+								if valueStr == tagPrimary {
 									tmpSchema.Primary = cols
 								}
-								if valueStr == "index" {
+								if valueStr == tagIndex {
 									cols.IsIndex = true
 								}
-								if valueStr == "shard" {
+								if valueStr == tagShard {
 									tmpSchema.ShardCols = cols
 								}
 							}
