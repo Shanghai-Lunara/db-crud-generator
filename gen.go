@@ -82,7 +82,6 @@ func scan(scanPath string) []*Schema {
 				tmpSchema := &Schema{}
 				tmpSchema.Project = projectName
 				tmpSchema.Name = a.Name
-				tmpSchema.Shard = 4
 				sname := CapLow(a.Name)
 				if !strings.HasSuffix(sname, "s") {
 					sname += "s"
