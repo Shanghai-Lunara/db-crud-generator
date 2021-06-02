@@ -56,3 +56,44 @@ func main() {
 It will generate a go file contains insert, query and update methods.
 
 The where clause will only generate fields marked with primary and index.
+
+## Use after generated
+
+```go
+package main
+
+import (
+	"context"
+	"database/sql"
+	"github.com/Shanghai-Lunara/db-crud-generator/example/out"
+	"time"
+)
+
+func f(tx *sql.Tx, db *sql.DB) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
+	defer cancel()
+
+	// insert, index arg mark value at same row
+	err := out.NewThisIsASchemaInsert().
+		SetId(1, 1).
+		SetThisIsAnIndexCols(1, "emm").
+		SetId(2, 2).
+		SetId(3, 3).
+		SetThisIsAnIndexCols(2, "emm2").
+		SetThisIsAnIndexCols(3, "emm3").
+		ExecTx(ctx, tx)
+
+	// select
+	result, err := out.NewThisIsASchemaSelect().
+		SelectThisIsAnIndexCols().
+		WhereIdEq(1).
+		Query(ctx, db)
+
+	// update
+	err := out.NewThisIsASchemaUpdate().
+		SetThisIsAnIndexCols("oh").
+		WhereIdEq(1).
+		ExecTx(tx)
+}
+
+```
