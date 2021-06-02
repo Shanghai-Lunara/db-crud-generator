@@ -18,42 +18,41 @@ type ThisIsASchema struct {
 ## How to generate
 
 - Generate from command flags
-  
-    ```go
-    package main
-    
-    import (
-        gen "github.com/Shanghai-Lunara/db-crud-generator"
-    )
-    
-    func main() {
-        gen.GenerateWithFlagScan()
-    }
-    
-    ```
-    
-    run as: 
-    
-    ```shell
-    go run main.go  -projectName=my_project -scanPath=path/to/model -outputPath=path/to/out 
-    ```
+```go
+package main
+
+import (
+	gen "github.com/Shanghai-Lunara/db-crud-generator"
+)
+
+func main() {
+	gen.GenerateWithFlagScan()
+}
+
+```
+
+run as: 
+
+```shell
+go run main.go  -projectName=my_project -scanPath=path/to/model -outputPath=path/to/out 
+```
 
 - Or generate from parameter
-    ```go
-    package main
-    
-    import (
-        gen "github.com/Shanghai-Lunara/db-crud-generator"
-    )
-    
-    func main() {
-        gen.Generate("my_project", "path/to/model", "path/to/out")
-    }
-    
-    ```
+```go
+package main
+
+import (
+	gen "github.com/Shanghai-Lunara/db-crud-generator"
+)
+
+func main() {
+	gen.Generate("my_project", "path/to/model", "path/to/out")
+}
+
+```
 
 - Attention
 
-    It will generate a go file contains insert, query and update methods.
-    
-    The where clause will only generate fields marked with primary and index.
+It will generate a go file contains insert, query and update methods.
+
+The where clause will only generate fields marked with primary and index.
