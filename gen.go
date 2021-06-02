@@ -9,6 +9,7 @@ import (
 	"go/token"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"reflect"
 	"strconv"
 	"strings"
@@ -17,6 +18,8 @@ import (
 
 type Schema struct {
 	Project    string
+	PackagePath string
+	OutputPackage string
 	Name       string
 	SchemaName string
 	Cols       []*Cols
@@ -79,11 +82,10 @@ func scan(scanPath string) []*Schema {
 	if err != nil {
 		return nil
 	}
-	var files []*ast.File
 	var schemaList []*Schema
+
 	for _, v := range f {
-		for _, ff := range v.Files {
-			files = append(files, ff)
+		for kk, ff := range v.Files {
 			for _, a := range ff.Scope.Objects {
 				if a.Kind != ast.Typ {
 					continue
@@ -91,6 +93,7 @@ func scan(scanPath string) []*Schema {
 				tmpSchema := &Schema{}
 				tmpSchema.Project = projectName
 				tmpSchema.Name = a.Name
+				tmpSchema.PackagePath = filepath.Dir(kk)
 				sname := CapLow(a.Name)
 				if !strings.HasSuffix(sname, "s") {
 					sname += "s"
@@ -145,6 +148,7 @@ func runGenerate(schemaList []*Schema, outputPath string) {
 		temp = template.Must(template.New("db").Parse(dbTemplate))
 	}
 	for _, schemaObj := range schemaList {
+		schemaObj.OutputPackage = filepath.Base(outputPath)
 		filepath := fmt.Sprintf("%s/%s-generated.go", outputPath, schemaObj.SchemaName)
 		if !Exists(outputPath) {
 			err := os.MkdirAll(outputPath, os.ModePerm)

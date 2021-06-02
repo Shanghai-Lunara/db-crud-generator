@@ -1,4 +1,4 @@
-{{$isShard := gt .Shard 0}}package crud
+{{$isShard := gt .Shard 0}}package {{.OutputPackage}}
 
 import (
 	"context"
@@ -6,7 +6,7 @@ import (
 	"errors"
 	{{if $isShard}}"fmt"{{end}}
 	sq "github.com/Shanghai-Lunara/squirrel"
-	"github.com/Shanghai-Lunara/{{.Project}}/database/game"
+	model "github.com/Shanghai-Lunara/{{.Project}}/{{.PackagePath}}"
 )
 
 //
@@ -160,14 +160,14 @@ func (i *{{$.Name}}Insert) Set{{$v.Name}}(index int32, v {{$v.Type}}) *{{$.Name}
 type {{.Name}}Select struct {
 	handler sq.SelectBuilder
 
-	tmp      *game.{{.Name}}
+	tmp      *model.{{.Name}}
 	fieldMap map[string]interface{}
 }
 
 func New{{.Name}}Select() *{{.Name}}Select {
 	return &{{.Name}}Select{
 		handler:  sq.Select().From("{{.SchemaName}}"),
-		tmp:      &game.{{.Name}}{},
+		tmp:      &model.{{.Name}}{},
 		fieldMap: map[string]interface{}{},
 	}
 }
@@ -180,7 +180,7 @@ func (s *{{.Name}}Select) Page(pageIndex, pageSize int) *{{.Name}}Select {
 }
 
 
-func (s *{{.Name}}Select) Query(ctx context.Context, db *sql.DB) ([]*game.{{.Name}}, error) {
+func (s *{{.Name}}Select) Query(ctx context.Context, db *sql.DB) ([]*model.{{.Name}}, error) {
 	sqlStr, args, err := s.handler.ToSql()
 	if err != nil {
 		return nil, err
@@ -189,7 +189,7 @@ func (s *{{.Name}}Select) Query(ctx context.Context, db *sql.DB) ([]*game.{{.Nam
 	if err != nil {
 		return nil, err
 	}
-	results := make([]*game.{{.Name}}, 0)
+	results := make([]*model.{{.Name}}, 0)
 	columns, _ := rows.Columns()
 	dest := make([]interface{}, 0, len(columns))
 
@@ -197,7 +197,7 @@ func (s *{{.Name}}Select) Query(ctx context.Context, db *sql.DB) ([]*game.{{.Nam
 		dest = append(dest, s.fieldMap[v])
 	}
 	for rows.Next() {
-		result := &game.{{.Name}}{}
+		result := &model.{{.Name}}{}
 		err := rows.Scan(dest...)
 		if err != nil {
 			return nil, err
@@ -210,7 +210,7 @@ func (s *{{.Name}}Select) Query(ctx context.Context, db *sql.DB) ([]*game.{{.Nam
 	return results, nil
 }
 
-func (s *{{.Name}}Select) QueryRow(ctx context.Context, db *sql.DB) (*game.{{.Name}}, error) {
+func (s *{{.Name}}Select) QueryRow(ctx context.Context, db *sql.DB) (*model.{{.Name}}, error) {
 	sqlStr, args, err := s.handler.ToSql()
 	if err != nil {
 		return nil, err
@@ -236,7 +236,7 @@ func (s *{{.Name}}Select) QueryRow(ctx context.Context, db *sql.DB) (*game.{{.Na
 		return nil, err
 	}
 	_ = rows.Close()
-	result := &game.{{.Name}}{}
+	result := &model.{{.Name}}{}
 	{{range $k, $v := .Cols}}
 	result.{{$v.Name}} = s.tmp.{{$v.Name}}
 	{{end}}
