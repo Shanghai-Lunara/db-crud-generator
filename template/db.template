@@ -1,4 +1,4 @@
-{{$isShard := gt .Shard 0}}package gen
+{{$isShard := gt .Shard 0}}package crud
 
 import (
 	"context"
