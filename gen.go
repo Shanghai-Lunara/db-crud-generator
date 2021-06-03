@@ -94,11 +94,7 @@ func scan(scanPath string) []*Schema {
 				tmpSchema.Project = projectName
 				tmpSchema.Name = a.Name
 				tmpSchema.PackagePath = filepath.Dir(kk)
-				sname := CapLow(a.Name)
-				if !strings.HasSuffix(sname, "s") {
-					sname += "s"
-				}
-				tmpSchema.SchemaName = sname
+				tmpSchema.SchemaName = Camel2Snake(a.Name)
 				for _, field := range a.Decl.(*ast.TypeSpec).Type.(*ast.StructType).Fields.List {
 					cols := &Cols{
 						Name:       field.Names[0].Name,
@@ -149,7 +145,7 @@ func runGenerate(schemaList []*Schema, outputPath string) {
 	}
 	for _, schemaObj := range schemaList {
 		schemaObj.OutputPackage = filepath.Base(outputPath)
-		fpath := fmt.Sprintf("%s/%s-generated.go", outputPath, schemaObj.SchemaName)
+		fpath := fmt.Sprintf("%s/%s-generated.go", outputPath, CapLow(schemaObj.Name))
 		if !Exists(outputPath) {
 			err := os.MkdirAll(outputPath, os.ModePerm)
 			if err != nil {
@@ -188,6 +184,24 @@ func CapLow(str string) string {
 	}
 	return upperStr
 }
+
+func Camel2Snake(s string) string {
+	data := make([]byte, 0, len(s)*2)
+	j := false
+	num := len(s)
+	for i := 0; i < num; i++ {
+		d := s[i]
+		if i > 0 && d >= 'A' && d <= 'Z' && j {
+			data = append(data, '_')
+		}
+		if d != '_' {
+			j = true
+		}
+		data = append(data, d)
+	}
+	return strings.ToLower(string(data[:]))
+}
+
 
 func Exists(path string) bool {
 	_, err := os.Stat(path)
