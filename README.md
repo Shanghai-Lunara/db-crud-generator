@@ -2,7 +2,7 @@
 The tool which was used to auto generating crud codes with the go struct
 
 
-## Model struct define
+## Model struct definition
 
 It will scan tag of fields.
 
