@@ -12,7 +12,7 @@ import (
 	"errors"
 	{{if $isShard}}"fmt"{{end}}
 	sq "github.com/Shanghai-Lunara/squirrel"
-	"github.com/Shanghai-Lunara/{{.Project}}/{{.PackagePath}}"
+	model "github.com/Shanghai-Lunara/{{.Project}}/{{.PackagePath}}"
 )
 
 //
