@@ -149,14 +149,14 @@ func runGenerate(schemaList []*Schema, outputPath string) {
 	}
 	for _, schemaObj := range schemaList {
 		schemaObj.OutputPackage = filepath.Base(outputPath)
-		filepath := fmt.Sprintf("%s/%s-generated.go", outputPath, schemaObj.SchemaName)
+		fpath := fmt.Sprintf("%s/%s-generated.go", outputPath, schemaObj.SchemaName)
 		if !Exists(outputPath) {
 			err := os.MkdirAll(outputPath, os.ModePerm)
 			if err != nil {
 				panic(err)
 			}
 		}
-		fileGen, err := os.Create(filepath)
+		fileGen, err := os.Create(fpath)
 		if err != nil {
 			fmt.Println(err)
 			panic(err)
@@ -167,7 +167,7 @@ func runGenerate(schemaList []*Schema, outputPath string) {
 			panic(err)
 		}
 
-		_ = exec.Command("gofmt", "-w", filepath).Run()
+		_ = exec.Command("gofmt", "-w", fpath).Run()
 	}
 }
 
