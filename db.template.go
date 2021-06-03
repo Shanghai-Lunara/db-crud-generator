@@ -325,17 +325,22 @@ func (u *{{.Name}}Update) Exec(ctx context.Context, db *sql.DB) error {
     if err != nil {
     	return err
     }
-    if _, err := db.Exec(sqlStr, args...); err != nil {
+    if _, err := db.ExecContext(ctx, sqlStr, args...); err != nil {
     	return err
     }
 	return nil
 }
 
-func (u *{{.Name}}Update) ExecTx(tx *sql.Tx) error {
-	if _, err := u.handler.RunWith(tx).Exec(); err != nil {
+func (u *{{.Name}}Update) ExecTx(ctx context.Context, tx *sql.Tx) error {
+	sqlStr, args, err := u.handler.ToSql()
+    if err != nil {
 		tx.Rollback()
-		return err
-	}
+    	return err
+    }
+    if _, err := tx.ExecContext(ctx, sqlStr, args...); err != nil {
+		tx.Rollback()
+    	return err
+    }
 	return nil
 }
 
