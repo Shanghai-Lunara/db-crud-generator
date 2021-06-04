@@ -155,7 +155,7 @@ func (i *{{$.Name}}Insert) ExecTx(ctx context.Context, tx *sql.Tx) error {
 }
 
 {{range $k, $v := .Cols}}
-func (i *{{$.Name}}Insert) Set{{$v.Name}}(index int32, v {{$v.Type}}) *{{$.Name}}Insert {
+func (i *{{$.Name}}Insert) {{$v.Name}}(index int32, v {{$v.Type}}) *{{$.Name}}Insert {
 	i.setValue(index, "{{$v.SchemaName}}", v)
 	return i
 }
@@ -350,7 +350,7 @@ func (u *{{.Name}}Update) ExecTx(ctx context.Context, tx *sql.Tx) error {
 {{$isShardCols = eq $v.Name $.ShardCols.Name}}
 {{end}}
 {{$IsPrimary := eq $v.Name $.Primary.Name}}
-func (u *{{$.Name}}Update) Set{{$v.Name}}(v {{$v.Type}}) *{{$.Name}}Update {
+func (u *{{$.Name}}Update) {{$v.Name}}(v {{$v.Type}}) *{{$.Name}}Update {
 	u.handler = u.handler.Set("{{$v.SchemaName}}", v)
 	return u
 }
