@@ -209,8 +209,8 @@ func (s *{{.Name}}Select) Query(ctx context.Context, db *sql.DB) ([]*model.{{.Na
 			return nil, err
 		}
 		{{range $k, $v := .Cols}}
-		result.{{$v.Name}} = s.tmp.{{$v.Name}}
-		{{end}}
+		result.{{$v.Name}} = s.tmp.{{$v.Name}}{{end}}
+
 		results = append(results, result)
 	}
 	return results, nil
@@ -244,13 +244,13 @@ func (s *{{.Name}}Select) QueryRow(ctx context.Context, db *sql.DB) (*model.{{.N
 	_ = rows.Close()
 	result := &model.{{.Name}}{}
 	{{range $k, $v := .Cols}}
-	result.{{$v.Name}} = s.tmp.{{$v.Name}}
-	{{end}}
+	result.{{$v.Name}} = s.tmp.{{$v.Name}}{{end}}
+
 	return result, nil
 }
 
 func (s *{{$.Name}}Select) Select() *{{$.Name}}Select {
-	{{range $k, $v := .Cols}}s.handler = s.handler.Columns("{{$v.SchemaName}}")
+	{{range $k, $v := .Cols}}s.handler = s.handler.Columns("`+"`{{$v.SchemaName}}`"+`")
 	s.fieldMap["{{$v.SchemaName}}"] = &(s.tmp.{{$v.Name}})
 	{{end}}
 	return s
@@ -263,44 +263,44 @@ func (s *{{$.Name}}Select) Select() *{{$.Name}}Select {
 {{end}}
 {{$IsPrimary := eq $v.Name $.Primary.Name}}
 func (s *{{$.Name}}Select) Select{{$v.Name}}() *{{$.Name}}Select {
-	s.handler = s.handler.Columns("{{$v.SchemaName}}")
+	s.handler = s.handler.Columns("`+"`{{$v.SchemaName}}`"+`")
 	s.fieldMap["{{$v.SchemaName}}"] = &(s.tmp.{{$v.Name}})
 	return s
 }
 
 {{if or $isShardCols $v.IsIndex $IsPrimary}}
 func (s *{{$.Name}}Select) Where{{$v.Name}}Eq(v {{$v.Type}}) *{{$.Name}}Select {
-	s.handler = s.handler.Where(sq.Eq{"{{$v.SchemaName}}": v})
+	s.handler = s.handler.Where(sq.Eq{"`+"`{{$v.SchemaName}}`"+`": v})
 	return s
 }
 
 func (s *{{$.Name}}Select) Where{{$v.Name}}NotEq(v {{$v.Type}}) *{{$.Name}}Select {
-	s.handler = s.handler.Where(sq.NotEq{"{{$v.SchemaName}}": v})
+	s.handler = s.handler.Where(sq.NotEq{"`+"`{{$v.SchemaName}}`"+`": v})
 	return s
 }
 
 func (s *{{$.Name}}Select) Where{{$v.Name}}Gt(v {{$v.Type}}) *{{$.Name}}Select {
-	s.handler = s.handler.Where(sq.Gt{"{{$v.SchemaName}}": v})
+	s.handler = s.handler.Where(sq.Gt{"`+"`{{$v.SchemaName}}`"+`": v})
 	return s
 }
 
 func (s *{{$.Name}}Select) Where{{$v.Name}}Lt(v {{$v.Type}}) *{{$.Name}}Select {
-	s.handler = s.handler.Where(sq.Lt{"{{$v.SchemaName}}": v})
+	s.handler = s.handler.Where(sq.Lt{"`+"`{{$v.SchemaName}}`"+`": v})
 	return s
 }
 
 func (s *{{$.Name}}Select) Where{{$v.Name}}GtOrEq(v {{$v.Type}}) *{{$.Name}}Select {
-	s.handler = s.handler.Where(sq.GtOrEq{"{{$v.SchemaName}}": v})
+	s.handler = s.handler.Where(sq.GtOrEq{"`+"`{{$v.SchemaName}}`"+`": v})
 	return s
 }
 
 func (s *{{$.Name}}Select) Where{{$v.Name}}LtOrEq(v {{$v.Type}}) *{{$.Name}}Select {
-	s.handler = s.handler.Where(sq.GtOrEq{"{{$v.SchemaName}}": v})
+	s.handler = s.handler.Where(sq.GtOrEq{"`+"`{{$v.SchemaName}}`"+`": v})
 	return s
 }
 
 func (s *{{$.Name}}Select) Where{{$v.Name}}Like(v {{$v.Type}}) *{{$.Name}}Select {
-	s.handler = s.handler.Where(sq.Like{"{{$v.SchemaName}}": v})
+	s.handler = s.handler.Where(sq.Like{"`+"`{{$v.SchemaName}}`"+`": v})
 	return s
 }
 {{end}}
@@ -351,43 +351,43 @@ func (u *{{.Name}}Update) ExecTx(ctx context.Context, tx *sql.Tx) error {
 {{end}}
 {{$IsPrimary := eq $v.Name $.Primary.Name}}
 func (u *{{$.Name}}Update) {{$v.Name}}(v {{$v.Type}}) *{{$.Name}}Update {
-	u.handler = u.handler.Set("{{$v.SchemaName}}", v)
+	u.handler = u.handler.Set("`+"`{{$v.SchemaName}}`"+`", v)
 	return u
 }
 
 {{if or $isShardCols $v.IsIndex $IsPrimary}}
 func (u *{{$.Name}}Update) Where{{$v.Name}}Eq(v {{$v.Type}}) *{{$.Name}}Update {
-	u.handler = u.handler.Where(sq.Eq{"{{$v.SchemaName}}": v})
+	u.handler = u.handler.Where(sq.Eq{"`+"`{{$v.SchemaName}}`"+`": v})
 	return u
 }
 
 func (u *{{$.Name}}Update) Where{{$v.Name}}NotEq(v {{$v.Type}}) *{{$.Name}}Update {
-	u.handler = u.handler.Where(sq.NotEq{"{{$v.SchemaName}}": v})
+	u.handler = u.handler.Where(sq.NotEq{"`+"`{{$v.SchemaName}}`"+`": v})
 	return u
 }
 
 func (u *{{$.Name}}Update) Where{{$v.Name}}Gt(v {{$v.Type}}) *{{$.Name}}Update {
-	u.handler = u.handler.Where(sq.Gt{"{{$v.SchemaName}}": v})
+	u.handler = u.handler.Where(sq.Gt{"`+"`{{$v.SchemaName}}`"+`": v})
 	return u
 }
 
 func (u *{{$.Name}}Update) Where{{$v.Name}}Lt(v {{$v.Type}}) *{{$.Name}}Update {
-	u.handler = u.handler.Where(sq.Lt{"{{$v.SchemaName}}": v})
+	u.handler = u.handler.Where(sq.Lt{"`+"`{{$v.SchemaName}}`"+`": v})
 	return u
 }
 
 func (u *{{$.Name}}Update) Where{{$v.Name}}GtOrEq(v {{$v.Type}}) *{{$.Name}}Update {
-	u.handler = u.handler.Where(sq.GtOrEq{"{{$v.SchemaName}}": v})
+	u.handler = u.handler.Where(sq.GtOrEq{"`+"`{{$v.SchemaName}}`"+`": v})
 	return u
 }
 
 func (u *{{$.Name}}Update) Where{{$v.Name}}LtOrEq(v {{$v.Type}}) *{{$.Name}}Update {
-	u.handler = u.handler.Where(sq.GtOrEq{"{{$v.SchemaName}}": v})
+	u.handler = u.handler.Where(sq.GtOrEq{"`+"`{{$v.SchemaName}}`"+`": v})
 	return u
 }
 
 func (u *{{$.Name}}Update) Where{{$v.Name}}Like(v {{$v.Type}}) *{{$.Name}}Update {
-	u.handler = u.handler.Where(sq.Like{"{{$v.SchemaName}}": v})
+	u.handler = u.handler.Where(sq.Like{"`+"`{{$v.SchemaName}}`"+`": v})
 	return u
 }
 {{end}}
