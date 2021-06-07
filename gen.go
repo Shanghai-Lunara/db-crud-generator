@@ -17,16 +17,16 @@ import (
 )
 
 type Schema struct {
-	Project    string
-	PackagePath string
+	Project       string
+	PackagePath   string
 	OutputPackage string
-	Name       string
-	SchemaName string
-	Cols       []*Cols
-	Primary    *Cols
-	Index      [][]*Cols
-	Shard      int
-	ShardCols  *Cols
+	Name          string
+	SchemaName    string
+	Cols          []*Cols
+	Primary       *Cols
+	Index         [][]*Cols
+	Shard         int
+	ShardCols     *Cols
 }
 
 type Cols struct {
@@ -95,6 +95,21 @@ func scan(scanPath string) []*Schema {
 				tmpSchema.Name = a.Name
 				tmpSchema.PackagePath = filepath.Dir(kk)
 				tmpSchema.SchemaName = Camel2Snake(a.Name)
+				if len(ff.Comments) > 0 {
+					for _, docLine := range ff.Comments[0].List {
+						tmpDoc := strings.Trim(strings.TrimLeft(docLine.Text, "//"), " ")
+						if !strings.HasPrefix(tmpDoc, "@") {
+							continue
+						}
+						tmpDoc = strings.Trim(strings.TrimLeft(tmpDoc, "@"), " ")
+						sepIndex := strings.Index(tmpDoc, ":")
+						docKey, docValue := strings.Trim(tmpDoc[:sepIndex], " "), tmpDoc[sepIndex+1:]
+						switch docKey {
+						case "Name": tmpSchema.SchemaName = strings.Trim(docValue, " ")
+						default:
+						}
+					}
+				}
 				for _, field := range a.Decl.(*ast.TypeSpec).Type.(*ast.StructType).Fields.List {
 					cols := &Cols{
 						Name:       field.Names[0].Name,
@@ -145,7 +160,7 @@ func runGenerate(schemaList []*Schema, outputPath string) {
 	}
 	for _, schemaObj := range schemaList {
 		schemaObj.OutputPackage = filepath.Base(outputPath)
-		fpath := fmt.Sprintf("%s/%s-generated.go", outputPath, CapLow(schemaObj.Name))
+		fpath := fmt.Sprintf("%s/schema-%s-generated.go", outputPath, schemaObj.Name)
 		if !Exists(outputPath) {
 			err := os.MkdirAll(outputPath, os.ModePerm)
 			if err != nil {
@@ -201,7 +216,6 @@ func Camel2Snake(s string) string {
 	}
 	return strings.ToLower(string(data[:]))
 }
-
 
 func Exists(path string) bool {
 	_, err := os.Stat(path)
