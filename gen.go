@@ -24,7 +24,7 @@ type Schema struct {
 	SchemaName    string
 	Cols          []*Cols
 	Primary       *Cols
-	Index         [][]*Cols
+	Index         map[string][]*Cols
 	Shard         int
 	ShardCols     *Cols
 }
@@ -95,6 +95,7 @@ func scan(scanPath string) []*Schema {
 				tmpSchema.Name = a.Name
 				tmpSchema.PackagePath = filepath.Dir(kk)
 				tmpSchema.SchemaName = Camel2Snake(a.Name)
+				tmpSchema.Index = make(map[string][]*Cols)
 				if len(ff.Comments) > 0 {
 					for _, docLine := range ff.Comments[0].List {
 						tmpDoc := strings.Trim(strings.TrimLeft(docLine.Text, "//"), " ")
@@ -126,13 +127,22 @@ func scan(scanPath string) []*Schema {
 						value, ok := tv.Lookup(tagKey)
 						if ok {
 							for _, valueStr := range strings.Split(value, ";") {
-								if valueStr == tagPrimary {
+								var vk, vv string
+								spIndex := strings.Index(valueStr, ":")
+								if spIndex != -1 {
+									vk = valueStr[:spIndex]
+									vv = valueStr[spIndex+1:]
+								}else {
+									vk = valueStr
+								}
+								if vk == tagPrimary {
 									tmpSchema.Primary = cols
 								}
-								if valueStr == tagIndex {
+								if vk == tagIndex {
 									cols.IsIndex = true
+									tmpSchema.Index[vv] = append(tmpSchema.Index[vv], cols)
 								}
-								if valueStr == tagShard {
+								if vk == tagShard {
 									tmpSchema.ShardCols = cols
 								}
 							}
