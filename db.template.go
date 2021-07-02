@@ -178,6 +178,31 @@ func New{{.Name}}Select() *{{.Name}}Select {
 	}
 }
 
+func (s *ThisIsASchemaSelect) Count(db *sql.DB) (int, error) {
+	sqlStr, args, err := s.handler.Column("COUNT(1)").ToSql()
+	if err != nil {
+		return 0, err
+	}
+	rows, err := db.QueryContext(context.Background(), sqlStr, args...)
+	if err != nil {
+		return 0, err
+	}
+	var dest int
+
+	if !rows.Next() {
+		if err := rows.Err(); err != nil {
+			return 0, err
+		}
+		return 0, sql.ErrNoRows
+	}
+	err = rows.Scan(&dest)
+	if err != nil {
+		return 0, err
+	}
+	_ = rows.Close()
+	return dest, nil
+}
+
 // page
 
 func (s *{{.Name}}Select) Page(pageIndex, pageSize int) *{{.Name}}Select {
