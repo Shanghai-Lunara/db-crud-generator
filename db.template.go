@@ -178,7 +178,7 @@ func New{{.Name}}Select() *{{.Name}}Select {
 	}
 }
 
-func (s *ThisIsASchemaSelect) Count(db *sql.DB) (int, error) {
+func (s *{{.Name}}Select) Count(db *sql.DB) (int, error) {
 	sqlStr, args, err := s.handler.Column("COUNT(1)").ToSql()
 	if err != nil {
 		return 0, err
