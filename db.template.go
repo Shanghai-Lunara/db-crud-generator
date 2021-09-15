@@ -26,14 +26,14 @@ func Get{{$.Name}}ShardIndex(v {{.ShardCols.Type}}) {{.ShardCols.Type}} { return
 type {{.Name}}Insert struct {
 	{{if $isShard}}handlers map[{{.ShardCols.Type}}]sq.InsertBuilder{{else}}handler sq.InsertBuilder{{end}}
 	cache    map[int32]map[string]interface{}
-	cols 	[]string
+	cols    map[string]struct{}
 }
 
 func New{{.Name}}Insert() *{{.Name}}Insert {
 	return &{{.Name}}Insert{
 		{{if $isShard}}handlers: make(map[{{.ShardCols.Type}}]sq.InsertBuilder){{else}}handler: sq.Insert("{{.SchemaName}}"){{end}},
 		cache:    make(map[int32]map[string]interface{}),
-		cols:    make([]string, 0),
+		cols:    make(map[string]struct{}),
 	}
 }
 
@@ -43,9 +43,7 @@ func (i *{{.Name}}Insert) setValue(index int32, k string, v interface{}) {
 		m = make(map[string]interface{})
 		i.cache[index] = m
 	}
-	if _, ok := m[k]; !ok {
-		i.cols = append(i.cols, k)
-	}
+	i.cols[k] = struct{}{}
 	m[k] = v
 }
 
@@ -86,9 +84,14 @@ func (i *{{$.Name}}Insert) build() error {
 	}
 	flag := false
 	i.handler = sq.Insert("{{.SchemaName}}")
+
+	var cols []string
+	for k := range i.cols {
+		cols = append(cols, k)
+	}
 	for _, argMap := range i.cache {
 		row := make([]interface{}, 0, len(i.cols))
-		for _, k := range i.cols {
+		for _, k := range cols {
 			if !flag {
 				i.handler = i.handler.Columns(k)
 			}

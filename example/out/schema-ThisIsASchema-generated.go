@@ -18,14 +18,14 @@ func GetThisIsASchemaSchemaName() string { return "this_is_a_schema" }
 type ThisIsASchemaInsert struct {
 	handler sq.InsertBuilder
 	cache   map[int32]map[string]interface{}
-	cols    []string
+	cols    map[string]struct{}
 }
 
 func NewThisIsASchemaInsert() *ThisIsASchemaInsert {
 	return &ThisIsASchemaInsert{
 		handler: sq.Insert("this_is_a_schema"),
 		cache:   make(map[int32]map[string]interface{}),
-		cols:    make([]string, 0),
+		cols:    make(map[string]struct{}),
 	}
 }
 
@@ -35,9 +35,7 @@ func (i *ThisIsASchemaInsert) setValue(index int32, k string, v interface{}) {
 		m = make(map[string]interface{})
 		i.cache[index] = m
 	}
-	if _, ok := m[k]; !ok {
-		i.cols = append(i.cols, k)
-	}
+	i.cols[k] = struct{}{}
 	m[k] = v
 }
 
@@ -47,9 +45,14 @@ func (i *ThisIsASchemaInsert) build() error {
 	}
 	flag := false
 	i.handler = sq.Insert("this_is_a_schema")
+
+	var cols []string
+	for k := range i.cols {
+		cols = append(cols, k)
+	}
 	for _, argMap := range i.cache {
 		row := make([]interface{}, 0, len(i.cols))
-		for _, k := range i.cols {
+		for _, k := range cols {
 			if !flag {
 				i.handler = i.handler.Columns(k)
 			}
