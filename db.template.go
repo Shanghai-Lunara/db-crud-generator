@@ -10,7 +10,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	{{if $isShard}}"fmt"{{end}}
+	"fmt"
 	sq "github.com/Shanghai-Lunara/squirrel"
 	model "github.com/Shanghai-Lunara/{{.Project}}/{{.PackagePath}}"
 )
@@ -226,6 +226,11 @@ func (s *{{.Name}}Select) Page(pageIndex, pageSize int) *{{.Name}}Select {
 	return s
 }
 
+func (s *{{.Name}}Select) OrderByRandom() *{{.Name}}Select {
+	s.handler = s.handler.OrderBy("?")
+	return s
+}
+
 
 func (s *{{.Name}}Select) Query(ctx context.Context, db *sql.DB) ([]*model.{{.Name}}, error) {
 	sqlStr, args, err := s.handler.ToSql()
@@ -342,6 +347,29 @@ func (s *{{$.Name}}Select) Where{{$v.Name}}LtOrEq(v {{$v.Type}}) *{{$.Name}}Sele
 
 func (s *{{$.Name}}Select) Where{{$v.Name}}Like(v {{$v.Type}}) *{{$.Name}}Select {
 	s.handler = s.handler.Where(sq.Like{"`+"`{{$v.SchemaName}}`"+`": v})
+	return s
+}
+
+func (s *{{$.Name}}Select) OrderBy{{$v.Name}}(desc bool) *{{$.Name}}Select {
+	if desc {
+		s.handler = s.handler.OrderBy("{{$v.SchemaName}} DESC")
+	} else {
+		s.handler = s.handler.OrderBy("{{$v.SchemaName}} ASC")
+	}
+	return s
+}
+
+func (s *{{$.Name}}Select) {{$v.Name}}In(args ...{{$v.Type}}) *{{$.Name}}Select {
+	sb := strings.Builder{}
+	sb.WriteString("{{$v.SchemaName}} IN (")
+	for index, v := range args {
+		sb.WriteString(fmt.Sprintf("%v", v))
+		if index < len(args) - 1 {
+			sb.WriteString(", ")
+		}
+	}
+	sb.WriteString(")")
+	s.handler = s.handler.Where(sq.Expr(sb.String()))
 	return s
 }
 {{end}}

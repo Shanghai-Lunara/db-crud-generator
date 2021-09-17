@@ -6,9 +6,10 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-
+	"fmt"
 	model "github.com/Shanghai-Lunara/db-crud-generator/example/input"
 	sq "github.com/Shanghai-Lunara/squirrel"
+	"strings"
 )
 
 //
@@ -168,6 +169,11 @@ func (s *ThisIsASchemaSelect) Page(pageIndex, pageSize int) *ThisIsASchemaSelect
 	return s
 }
 
+func (s *ThisIsASchemaSelect) OrderByRandom() *ThisIsASchemaSelect {
+	s.handler = s.handler.OrderBy("?")
+	return s
+}
+
 func (s *ThisIsASchemaSelect) Query(ctx context.Context, db *sql.DB) ([]*model.ThisIsASchema, error) {
 	sqlStr, args, err := s.handler.ToSql()
 	if err != nil {
@@ -283,6 +289,29 @@ func (s *ThisIsASchemaSelect) WhereIdLike(v int32) *ThisIsASchemaSelect {
 	return s
 }
 
+func (s *ThisIsASchemaSelect) OrderById(desc bool) *ThisIsASchemaSelect {
+	if desc {
+		s.handler = s.handler.OrderBy("id DESC")
+	} else {
+		s.handler = s.handler.OrderBy("id ASC")
+	}
+	return s
+}
+
+func (s *ThisIsASchemaSelect) IdIn(args ...int32) *ThisIsASchemaSelect {
+	sb := strings.Builder{}
+	sb.WriteString("id IN (")
+	for index, v := range args {
+		sb.WriteString(fmt.Sprintf("%v", v))
+		if index < len(args)-1 {
+			sb.WriteString(", ")
+		}
+	}
+	sb.WriteString(")")
+	s.handler = s.handler.Where(sq.Expr(sb.String()))
+	return s
+}
+
 func (s *ThisIsASchemaSelect) SelectThisIsAnIndexCols() *ThisIsASchemaSelect {
 	s.handler = s.handler.Columns("`thisIsAnIndexCols`")
 	s.fieldMap["thisIsAnIndexCols"] = &(s.tmp.ThisIsAnIndexCols)
@@ -321,6 +350,29 @@ func (s *ThisIsASchemaSelect) WhereThisIsAnIndexColsLtOrEq(v string) *ThisIsASch
 
 func (s *ThisIsASchemaSelect) WhereThisIsAnIndexColsLike(v string) *ThisIsASchemaSelect {
 	s.handler = s.handler.Where(sq.Like{"`thisIsAnIndexCols`": v})
+	return s
+}
+
+func (s *ThisIsASchemaSelect) OrderByThisIsAnIndexCols(desc bool) *ThisIsASchemaSelect {
+	if desc {
+		s.handler = s.handler.OrderBy("thisIsAnIndexCols DESC")
+	} else {
+		s.handler = s.handler.OrderBy("thisIsAnIndexCols ASC")
+	}
+	return s
+}
+
+func (s *ThisIsASchemaSelect) ThisIsAnIndexColsIn(args ...string) *ThisIsASchemaSelect {
+	sb := strings.Builder{}
+	sb.WriteString("thisIsAnIndexCols IN (")
+	for index, v := range args {
+		sb.WriteString(fmt.Sprintf("%v", v))
+		if index < len(args)-1 {
+			sb.WriteString(", ")
+		}
+	}
+	sb.WriteString(")")
+	s.handler = s.handler.Where(sq.Expr(sb.String()))
 	return s
 }
 
