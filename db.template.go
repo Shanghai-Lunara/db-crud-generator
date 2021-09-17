@@ -13,6 +13,7 @@ import (
 	"fmt"
 	sq "github.com/Shanghai-Lunara/squirrel"
 	model "github.com/Shanghai-Lunara/{{.Project}}/{{.PackagePath}}"
+	"strings"
 )
 
 //
