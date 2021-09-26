@@ -263,6 +263,39 @@ func (s *{{.Name}}Select) Query(ctx context.Context, db *sql.DB) ([]*model.{{.Na
 	return results, nil
 }
 
+func (s *{{.Name}}Select) QueryTx(ctx context.Context, tx *sql.Tx) ([]*model.{{.Name}}, error) {
+	sqlStr, args, err := s.handler.ToSql()
+	if err != nil {
+		_ = tx.Rollback()
+		return nil, err
+	}
+	rows, err := tx.QueryContext(ctx, sqlStr, args...)
+	if err != nil {
+		_ = tx.Rollback()
+		return nil, err
+	}
+	results := make([]*model.{{.Name}}, 0)
+	columns, _ := rows.Columns()
+	dest := make([]interface{}, 0, len(columns))
+
+	for _, v := range columns {
+		dest = append(dest, s.fieldMap[v])
+	}
+	for rows.Next() {
+		result := &model.{{.Name}}{}
+		err := rows.Scan(dest...)
+		if err != nil {
+			_ = tx.Rollback()
+			return nil, err
+		}
+		{{range $k, $v := .Cols}}
+		result.{{$v.Name}} = s.tmp.{{$v.Name}}{{end}}
+
+		results = append(results, result)
+	}
+	return results, nil
+}
+
 func (s *{{.Name}}Select) QueryRow(ctx context.Context, db *sql.DB) (*model.{{.Name}}, error) {
 	sqlStr, args, err := s.handler.ToSql()
 	if err != nil {
@@ -286,6 +319,43 @@ func (s *{{.Name}}Select) QueryRow(ctx context.Context, db *sql.DB) (*model.{{.N
 	}
 	err = rows.Scan(dest...)
 	if err != nil {
+		return nil, err
+	}
+	_ = rows.Close()
+	result := &model.{{.Name}}{}
+	{{range $k, $v := .Cols}}
+	result.{{$v.Name}} = s.tmp.{{$v.Name}}{{end}}
+
+	return result, nil
+}
+
+func (s *{{.Name}}Select) QueryRowTx(ctx context.Context, tx *sql.Tx) (*model.{{.Name}}, error) {
+	sqlStr, args, err := s.handler.ToSql()
+	if err != nil {
+		_ = tx.Rollback()
+		return nil, err
+	}
+	rows, err := tx.QueryContext(ctx, sqlStr, args...)
+	if err != nil {
+		_ = tx.Rollback()
+		return nil, err
+	}
+	columns, _ := rows.Columns()
+	dest := make([]interface{}, 0, len(columns))
+
+	for _, v := range columns {
+		dest = append(dest, s.fieldMap[v])
+	}
+	if !rows.Next() {
+		if err := rows.Err(); err != nil {
+			_ = tx.Rollback()
+			return nil, err
+		}
+		return nil, sql.ErrNoRows
+	}
+	err = rows.Scan(dest...)
+	if err != nil {
+		_ = tx.Rollback()
 		return nil, err
 	}
 	_ = rows.Close()

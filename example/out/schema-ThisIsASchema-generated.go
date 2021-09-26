@@ -170,7 +170,7 @@ func (s *ThisIsASchemaSelect) Page(pageIndex, pageSize int) *ThisIsASchemaSelect
 }
 
 func (s *ThisIsASchemaSelect) OrderByRandom() *ThisIsASchemaSelect {
-	s.handler = s.handler.OrderBy("?")
+	s.handler = s.handler.OrderBy("\"?\"")
 	return s
 }
 
@@ -205,6 +205,40 @@ func (s *ThisIsASchemaSelect) Query(ctx context.Context, db *sql.DB) ([]*model.T
 	return results, nil
 }
 
+func (s *ThisIsASchemaSelect) QueryTx(ctx context.Context, tx *sql.Tx) ([]*model.ThisIsASchema, error) {
+	sqlStr, args, err := s.handler.ToSql()
+	if err != nil {
+		_ = tx.Rollback()
+		return nil, err
+	}
+	rows, err := tx.QueryContext(ctx, sqlStr, args...)
+	if err != nil {
+		_ = tx.Rollback()
+		return nil, err
+	}
+	results := make([]*model.ThisIsASchema, 0)
+	columns, _ := rows.Columns()
+	dest := make([]interface{}, 0, len(columns))
+
+	for _, v := range columns {
+		dest = append(dest, s.fieldMap[v])
+	}
+	for rows.Next() {
+		result := &model.ThisIsASchema{}
+		err := rows.Scan(dest...)
+		if err != nil {
+			_ = tx.Rollback()
+			return nil, err
+		}
+
+		result.Id = s.tmp.Id
+		result.ThisIsAnIndexCols = s.tmp.ThisIsAnIndexCols
+
+		results = append(results, result)
+	}
+	return results, nil
+}
+
 func (s *ThisIsASchemaSelect) QueryRow(ctx context.Context, db *sql.DB) (*model.ThisIsASchema, error) {
 	sqlStr, args, err := s.handler.ToSql()
 	if err != nil {
@@ -228,6 +262,44 @@ func (s *ThisIsASchemaSelect) QueryRow(ctx context.Context, db *sql.DB) (*model.
 	}
 	err = rows.Scan(dest...)
 	if err != nil {
+		return nil, err
+	}
+	_ = rows.Close()
+	result := &model.ThisIsASchema{}
+
+	result.Id = s.tmp.Id
+	result.ThisIsAnIndexCols = s.tmp.ThisIsAnIndexCols
+
+	return result, nil
+}
+
+func (s *ThisIsASchemaSelect) QueryRowTx(ctx context.Context, tx *sql.Tx) (*model.ThisIsASchema, error) {
+	sqlStr, args, err := s.handler.ToSql()
+	if err != nil {
+		_ = tx.Rollback()
+		return nil, err
+	}
+	rows, err := tx.QueryContext(ctx, sqlStr, args...)
+	if err != nil {
+		_ = tx.Rollback()
+		return nil, err
+	}
+	columns, _ := rows.Columns()
+	dest := make([]interface{}, 0, len(columns))
+
+	for _, v := range columns {
+		dest = append(dest, s.fieldMap[v])
+	}
+	if !rows.Next() {
+		if err := rows.Err(); err != nil {
+			_ = tx.Rollback()
+			return nil, err
+		}
+		return nil, sql.ErrNoRows
+	}
+	err = rows.Scan(dest...)
+	if err != nil {
+		_ = tx.Rollback()
 		return nil, err
 	}
 	_ = rows.Close()
