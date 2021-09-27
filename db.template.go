@@ -430,7 +430,7 @@ func (s *{{$.Name}}Select) OrderBy{{$v.Name}}(desc bool) *{{$.Name}}Select {
 	return s
 }
 
-func (s *{{$.Name}}Select) {{$v.Name}}In(args ...{{$v.Type}}) *{{$.Name}}Select {
+func (s *{{$.Name}}Select) Where{{$v.Name}}In(args ...{{$v.Type}}) *{{$.Name}}Select {
 	sb := strings.Builder{}
 	sb.WriteString("{{$v.SchemaName}} IN (")
 	for index, v := range args {
@@ -529,6 +529,20 @@ func (u *{{$.Name}}Update) Where{{$v.Name}}LtOrEq(v {{$v.Type}}) *{{$.Name}}Upda
 func (u *{{$.Name}}Update) Where{{$v.Name}}Like(v {{$v.Type}}) *{{$.Name}}Update {
 	u.handler = u.handler.Where(sq.Like{"`+"`{{$v.SchemaName}}`"+`": v})
 	return u
+}
+
+func (s *{{$.Name}}Update) Where{{$v.Name}}In(args ...{{$v.Type}}) *{{$.Name}}Update {
+	sb := strings.Builder{}
+	sb.WriteString("{{$v.SchemaName}} IN (")
+	for index, v := range args {
+		sb.WriteString(fmt.Sprintf("%v", v))
+		if index < len(args) - 1 {
+			sb.WriteString(", ")
+		}
+	}
+	sb.WriteString(")")
+	s.handler = s.handler.Where(sq.Expr(sb.String()))
+	return s
 }
 {{end}}
 {{end}}

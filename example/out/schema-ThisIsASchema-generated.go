@@ -370,7 +370,7 @@ func (s *ThisIsASchemaSelect) OrderById(desc bool) *ThisIsASchemaSelect {
 	return s
 }
 
-func (s *ThisIsASchemaSelect) IdIn(args ...int32) *ThisIsASchemaSelect {
+func (s *ThisIsASchemaSelect) WhereIdIn(args ...int32) *ThisIsASchemaSelect {
 	sb := strings.Builder{}
 	sb.WriteString("id IN (")
 	for index, v := range args {
@@ -434,7 +434,7 @@ func (s *ThisIsASchemaSelect) OrderByThisIsAnIndexCols(desc bool) *ThisIsASchema
 	return s
 }
 
-func (s *ThisIsASchemaSelect) ThisIsAnIndexColsIn(args ...string) *ThisIsASchemaSelect {
+func (s *ThisIsASchemaSelect) WhereThisIsAnIndexColsIn(args ...string) *ThisIsASchemaSelect {
 	sb := strings.Builder{}
 	sb.WriteString("thisIsAnIndexCols IN (")
 	for index, v := range args {
@@ -522,6 +522,20 @@ func (u *ThisIsASchemaUpdate) WhereIdLike(v int32) *ThisIsASchemaUpdate {
 	return u
 }
 
+func (s *ThisIsASchemaUpdate) WhereIdIn(args ...int32) *ThisIsASchemaUpdate {
+	sb := strings.Builder{}
+	sb.WriteString("id IN (")
+	for index, v := range args {
+		sb.WriteString(fmt.Sprintf("%v", v))
+		if index < len(args)-1 {
+			sb.WriteString(", ")
+		}
+	}
+	sb.WriteString(")")
+	s.handler = s.handler.Where(sq.Expr(sb.String()))
+	return s
+}
+
 func (u *ThisIsASchemaUpdate) ThisIsAnIndexCols(v string) *ThisIsASchemaUpdate {
 	u.handler = u.handler.Set("`thisIsAnIndexCols`", v)
 	return u
@@ -560,4 +574,18 @@ func (u *ThisIsASchemaUpdate) WhereThisIsAnIndexColsLtOrEq(v string) *ThisIsASch
 func (u *ThisIsASchemaUpdate) WhereThisIsAnIndexColsLike(v string) *ThisIsASchemaUpdate {
 	u.handler = u.handler.Where(sq.Like{"`thisIsAnIndexCols`": v})
 	return u
+}
+
+func (s *ThisIsASchemaUpdate) WhereThisIsAnIndexColsIn(args ...string) *ThisIsASchemaUpdate {
+	sb := strings.Builder{}
+	sb.WriteString("thisIsAnIndexCols IN (")
+	for index, v := range args {
+		sb.WriteString(fmt.Sprintf("%v", v))
+		if index < len(args)-1 {
+			sb.WriteString(", ")
+		}
+	}
+	sb.WriteString(")")
+	s.handler = s.handler.Where(sq.Expr(sb.String()))
+	return s
 }
