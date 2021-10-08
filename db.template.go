@@ -228,7 +228,7 @@ func (s *{{.Name}}Select) Page(pageIndex, pageSize int) *{{.Name}}Select {
 }
 
 func (s *{{.Name}}Select) OrderByRandom() *{{.Name}}Select {
-	s.handler = s.handler.OrderBy("\"?\"")
+	s.handler = s.handler.OrderBy("rand()")
 	return s
 }
 
