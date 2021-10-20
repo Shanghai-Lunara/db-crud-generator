@@ -77,39 +77,45 @@ func (i *ThisIsASchemaInsert) build() error {
 	return nil
 }
 
-func (i *ThisIsASchemaInsert) Exec(ctx context.Context, db *sql.DB) error {
+func (i *ThisIsASchemaInsert) Exec(ctx context.Context, db *sql.DB) (sql.Result, error) {
 	if err := i.build(); err != nil {
-		return err
+		return nil, err
 	}
+	var result sql.Result
+	var err error
 
-	sqlStr, args, err := i.handler.ToSql()
+	sqlStr, args, err1 := i.handler.ToSql()
+	if err1 != nil {
+		return nil, err1
+	}
+	result, err = db.ExecContext(ctx, sqlStr, args...)
 	if err != nil {
-		return err
-	}
-	if _, err = db.ExecContext(ctx, sqlStr, args...); err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	return result, nil
 }
 
-func (i *ThisIsASchemaInsert) ExecTx(ctx context.Context, tx *sql.Tx) error {
+func (i *ThisIsASchemaInsert) ExecTx(ctx context.Context, tx *sql.Tx) (sql.Result, error) {
 	if err := i.build(); err != nil {
 		tx.Rollback()
-		return err
+		return nil, err
 	}
+	var result sql.Result
+	var err error
 
-	sqlStr, args, err := i.handler.ToSql()
+	sqlStr, args, err1 := i.handler.ToSql()
+	if err1 != nil {
+		tx.Rollback()
+		return nil, err1
+	}
+	result, err = tx.ExecContext(ctx, sqlStr, args...)
 	if err != nil {
 		tx.Rollback()
-		return err
-	}
-	if _, err = tx.ExecContext(ctx, sqlStr, args...); err != nil {
-		tx.Rollback()
-		return err
+		return nil, err
 	}
 
-	return nil
+	return result, nil
 }
 
 func (i *ThisIsASchemaInsert) Id(index int32, v int32) *ThisIsASchemaInsert {

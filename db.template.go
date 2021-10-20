@@ -113,62 +113,69 @@ func (i *{{$.Name}}Insert) build() error {
 }
 {{end}}
 
-func (i *{{$.Name}}Insert) Exec(ctx context.Context, db *sql.DB) error {
+func (i *{{$.Name}}Insert) Exec(ctx context.Context, db *sql.DB) (sql.Result, error) {
 	if err := i.build(); err != nil {
-		return err
+		return nil, err
 	}
+	var result sql.Result
+	var err error
     {{if gt $.Shard 0}}
 	for _, handler := range i.handlers {
-		sqlStr, args, err := handler.ToSql()
-		if err != nil {
-			return err
+		sqlStr, args, err1 := handler.ToSql()
+		if err1 != nil {
+			return nil, err1
 		}
-		if _, err = db.ExecContext(ctx, sqlStr, args...); err != nil {
-			return err
+		result, err = db.ExecContext(ctx, sqlStr, args...)
+		if err != nil {
+			return nil, err
 		}
 	}
 	{{else}}
-	sqlStr, args, err := i.handler.ToSql()
-    if err != nil {
-    	return err
+	sqlStr, args, err1 := i.handler.ToSql()
+    if err1 != nil {
+    	return nil, err1
     }
-    if _, err = db.ExecContext(ctx, sqlStr, args...); err != nil {
-    	return err
+    result, err = db.ExecContext(ctx, sqlStr, args...)
+	if err != nil {
+    	return nil, err
     }
 	{{end}}
-	return nil
+	return result, nil
 }
 
-func (i *{{$.Name}}Insert) ExecTx(ctx context.Context, tx *sql.Tx) error {
+func (i *{{$.Name}}Insert) ExecTx(ctx context.Context, tx *sql.Tx) (sql.Result, error) {
 	if err := i.build(); err != nil {
 		tx.Rollback()
-		return err
+		return nil, err
 	}
-
+	var result sql.Result
+	var err error
     {{if gt $.Shard 0}}
 	for _, handler := range i.handlers {
-		sqlStr, args, err := handler.ToSql()
+		sqlStr, args, err1 := handler.ToSql()
+		if err1 != nil {
+			tx.Rollback()
+			return nil, err1
+		}
+		result, err = tx.ExecContext(ctx, sqlStr, args...)
 		if err != nil {
 			tx.Rollback()
-			return err
-		}
-		if _, err = tx.ExecContext(ctx, sqlStr, args...); err != nil {
-			tx.Rollback()
-			return err
+			return nil, err
 		}
 	}
 	{{else}}
-	sqlStr, args, err := i.handler.ToSql()
-    if err != nil {
+	sqlStr, args, err1 := i.handler.ToSql()
+    if err1 != nil {
     	tx.Rollback()
-    	return err
+    	return nil, err1
     }
-    if _, err = tx.ExecContext(ctx, sqlStr, args...); err != nil {
+    result, err = tx.ExecContext(ctx, sqlStr, args...)
+	if err != nil {
     	tx.Rollback()
-    	return err
+    	return nil, err
     }
 	{{end}}
-	return nil
+	return result, nil
 }
 
 {{range $k, $v := .Cols}}
