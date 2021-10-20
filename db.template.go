@@ -451,16 +451,21 @@ func (s *{{$.Name}}Select) Where{{$v.Name}}In(args ...{{$v.Type}}) *{{$.Name}}Se
 
 
 type {{.Name}}Update struct {
-	handler sq.UpdateBuilder
+	handler 	sq.UpdateBuilder
+	whereFlag 	bool
 }
 
 func New{{.Name}}Update() *{{.Name}}Update {
 	return &{{.Name}}Update{
-		handler: sq.Update("{{.SchemaName}}"),
+		handler: 	sq.Update("{{.SchemaName}}"),
+		whereFlag: 	false,
 	}
 }
 
 func (u *{{.Name}}Update) Exec(ctx context.Context, db *sql.DB) error {
+	if !u.whereFlag {
+		return errors.New("update no where clause")
+	}
 	sqlStr, args, err := u.handler.ToSql()
     if err != nil {
     	return err
@@ -472,6 +477,9 @@ func (u *{{.Name}}Update) Exec(ctx context.Context, db *sql.DB) error {
 }
 
 func (u *{{.Name}}Update) ExecTx(ctx context.Context, tx *sql.Tx) error {
+	if !u.whereFlag {
+		return errors.New("update no where clause")
+	}
 	sqlStr, args, err := u.handler.ToSql()
     if err != nil {
 		tx.Rollback()
@@ -498,40 +506,47 @@ func (u *{{$.Name}}Update) {{$v.Name}}(v {{$v.Type}}) *{{$.Name}}Update {
 {{if or $isShardCols $v.IsIndex $IsPrimary}}
 func (u *{{$.Name}}Update) Where{{$v.Name}}Eq(v {{$v.Type}}) *{{$.Name}}Update {
 	u.handler = u.handler.Where(sq.Eq{"`+"`{{$v.SchemaName}}`"+`": v})
+	u.whereFlag = true
 	return u
 }
 
 func (u *{{$.Name}}Update) Where{{$v.Name}}NotEq(v {{$v.Type}}) *{{$.Name}}Update {
 	u.handler = u.handler.Where(sq.NotEq{"`+"`{{$v.SchemaName}}`"+`": v})
+	u.whereFlag = true
 	return u
 }
 
 func (u *{{$.Name}}Update) Where{{$v.Name}}Gt(v {{$v.Type}}) *{{$.Name}}Update {
 	u.handler = u.handler.Where(sq.Gt{"`+"`{{$v.SchemaName}}`"+`": v})
+	u.whereFlag = true
 	return u
 }
 
 func (u *{{$.Name}}Update) Where{{$v.Name}}Lt(v {{$v.Type}}) *{{$.Name}}Update {
 	u.handler = u.handler.Where(sq.Lt{"`+"`{{$v.SchemaName}}`"+`": v})
+	u.whereFlag = true
 	return u
 }
 
 func (u *{{$.Name}}Update) Where{{$v.Name}}GtOrEq(v {{$v.Type}}) *{{$.Name}}Update {
 	u.handler = u.handler.Where(sq.GtOrEq{"`+"`{{$v.SchemaName}}`"+`": v})
+	u.whereFlag = true
 	return u
 }
 
 func (u *{{$.Name}}Update) Where{{$v.Name}}LtOrEq(v {{$v.Type}}) *{{$.Name}}Update {
 	u.handler = u.handler.Where(sq.GtOrEq{"`+"`{{$v.SchemaName}}`"+`": v})
+	u.whereFlag = true
 	return u
 }
 
 func (u *{{$.Name}}Update) Where{{$v.Name}}Like(v {{$v.Type}}) *{{$.Name}}Update {
 	u.handler = u.handler.Where(sq.Like{"`+"`{{$v.SchemaName}}`"+`": v})
+	u.whereFlag = true
 	return u
 }
 
-func (s *{{$.Name}}Update) Where{{$v.Name}}In(args ...{{$v.Type}}) *{{$.Name}}Update {
+func (u *{{$.Name}}Update) Where{{$v.Name}}In(args ...{{$v.Type}}) *{{$.Name}}Update {
 	sb := strings.Builder{}
 	sb.WriteString("{{$v.SchemaName}} IN (")
 	for index, v := range args {
@@ -541,8 +556,9 @@ func (s *{{$.Name}}Update) Where{{$v.Name}}In(args ...{{$v.Type}}) *{{$.Name}}Up
 		}
 	}
 	sb.WriteString(")")
-	s.handler = s.handler.Where(sq.Expr(sb.String()))
-	return s
+	u.handler = u.handler.Where(sq.Expr(sb.String()))
+	u.whereFlag = true
+	return u
 }
 {{end}}
 {{end}}

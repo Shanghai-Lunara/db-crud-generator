@@ -170,7 +170,7 @@ func (s *ThisIsASchemaSelect) Page(pageIndex, pageSize int) *ThisIsASchemaSelect
 }
 
 func (s *ThisIsASchemaSelect) OrderByRandom() *ThisIsASchemaSelect {
-	s.handler = s.handler.OrderBy("\"?\"")
+	s.handler = s.handler.OrderBy("rand()")
 	return s
 }
 
@@ -449,16 +449,21 @@ func (s *ThisIsASchemaSelect) WhereThisIsAnIndexColsIn(args ...string) *ThisIsAS
 }
 
 type ThisIsASchemaUpdate struct {
-	handler sq.UpdateBuilder
+	handler   sq.UpdateBuilder
+	whereFlag bool
 }
 
 func NewThisIsASchemaUpdate() *ThisIsASchemaUpdate {
 	return &ThisIsASchemaUpdate{
-		handler: sq.Update("this_is_a_schema"),
+		handler:   sq.Update("this_is_a_schema"),
+		whereFlag: false,
 	}
 }
 
 func (u *ThisIsASchemaUpdate) Exec(ctx context.Context, db *sql.DB) error {
+	if !u.whereFlag {
+		return errors.New("update no where clause")
+	}
 	sqlStr, args, err := u.handler.ToSql()
 	if err != nil {
 		return err
@@ -470,6 +475,9 @@ func (u *ThisIsASchemaUpdate) Exec(ctx context.Context, db *sql.DB) error {
 }
 
 func (u *ThisIsASchemaUpdate) ExecTx(ctx context.Context, tx *sql.Tx) error {
+	if !u.whereFlag {
+		return errors.New("update no where clause")
+	}
 	sqlStr, args, err := u.handler.ToSql()
 	if err != nil {
 		tx.Rollback()
@@ -489,40 +497,47 @@ func (u *ThisIsASchemaUpdate) Id(v int32) *ThisIsASchemaUpdate {
 
 func (u *ThisIsASchemaUpdate) WhereIdEq(v int32) *ThisIsASchemaUpdate {
 	u.handler = u.handler.Where(sq.Eq{"`id`": v})
+	u.whereFlag = true
 	return u
 }
 
 func (u *ThisIsASchemaUpdate) WhereIdNotEq(v int32) *ThisIsASchemaUpdate {
 	u.handler = u.handler.Where(sq.NotEq{"`id`": v})
+	u.whereFlag = true
 	return u
 }
 
 func (u *ThisIsASchemaUpdate) WhereIdGt(v int32) *ThisIsASchemaUpdate {
 	u.handler = u.handler.Where(sq.Gt{"`id`": v})
+	u.whereFlag = true
 	return u
 }
 
 func (u *ThisIsASchemaUpdate) WhereIdLt(v int32) *ThisIsASchemaUpdate {
 	u.handler = u.handler.Where(sq.Lt{"`id`": v})
+	u.whereFlag = true
 	return u
 }
 
 func (u *ThisIsASchemaUpdate) WhereIdGtOrEq(v int32) *ThisIsASchemaUpdate {
 	u.handler = u.handler.Where(sq.GtOrEq{"`id`": v})
+	u.whereFlag = true
 	return u
 }
 
 func (u *ThisIsASchemaUpdate) WhereIdLtOrEq(v int32) *ThisIsASchemaUpdate {
 	u.handler = u.handler.Where(sq.GtOrEq{"`id`": v})
+	u.whereFlag = true
 	return u
 }
 
 func (u *ThisIsASchemaUpdate) WhereIdLike(v int32) *ThisIsASchemaUpdate {
 	u.handler = u.handler.Where(sq.Like{"`id`": v})
+	u.whereFlag = true
 	return u
 }
 
-func (s *ThisIsASchemaUpdate) WhereIdIn(args ...int32) *ThisIsASchemaUpdate {
+func (u *ThisIsASchemaUpdate) WhereIdIn(args ...int32) *ThisIsASchemaUpdate {
 	sb := strings.Builder{}
 	sb.WriteString("id IN (")
 	for index, v := range args {
@@ -532,8 +547,9 @@ func (s *ThisIsASchemaUpdate) WhereIdIn(args ...int32) *ThisIsASchemaUpdate {
 		}
 	}
 	sb.WriteString(")")
-	s.handler = s.handler.Where(sq.Expr(sb.String()))
-	return s
+	u.handler = u.handler.Where(sq.Expr(sb.String()))
+	u.whereFlag = true
+	return u
 }
 
 func (u *ThisIsASchemaUpdate) ThisIsAnIndexCols(v string) *ThisIsASchemaUpdate {
@@ -543,40 +559,47 @@ func (u *ThisIsASchemaUpdate) ThisIsAnIndexCols(v string) *ThisIsASchemaUpdate {
 
 func (u *ThisIsASchemaUpdate) WhereThisIsAnIndexColsEq(v string) *ThisIsASchemaUpdate {
 	u.handler = u.handler.Where(sq.Eq{"`thisIsAnIndexCols`": v})
+	u.whereFlag = true
 	return u
 }
 
 func (u *ThisIsASchemaUpdate) WhereThisIsAnIndexColsNotEq(v string) *ThisIsASchemaUpdate {
 	u.handler = u.handler.Where(sq.NotEq{"`thisIsAnIndexCols`": v})
+	u.whereFlag = true
 	return u
 }
 
 func (u *ThisIsASchemaUpdate) WhereThisIsAnIndexColsGt(v string) *ThisIsASchemaUpdate {
 	u.handler = u.handler.Where(sq.Gt{"`thisIsAnIndexCols`": v})
+	u.whereFlag = true
 	return u
 }
 
 func (u *ThisIsASchemaUpdate) WhereThisIsAnIndexColsLt(v string) *ThisIsASchemaUpdate {
 	u.handler = u.handler.Where(sq.Lt{"`thisIsAnIndexCols`": v})
+	u.whereFlag = true
 	return u
 }
 
 func (u *ThisIsASchemaUpdate) WhereThisIsAnIndexColsGtOrEq(v string) *ThisIsASchemaUpdate {
 	u.handler = u.handler.Where(sq.GtOrEq{"`thisIsAnIndexCols`": v})
+	u.whereFlag = true
 	return u
 }
 
 func (u *ThisIsASchemaUpdate) WhereThisIsAnIndexColsLtOrEq(v string) *ThisIsASchemaUpdate {
 	u.handler = u.handler.Where(sq.GtOrEq{"`thisIsAnIndexCols`": v})
+	u.whereFlag = true
 	return u
 }
 
 func (u *ThisIsASchemaUpdate) WhereThisIsAnIndexColsLike(v string) *ThisIsASchemaUpdate {
 	u.handler = u.handler.Where(sq.Like{"`thisIsAnIndexCols`": v})
+	u.whereFlag = true
 	return u
 }
 
-func (s *ThisIsASchemaUpdate) WhereThisIsAnIndexColsIn(args ...string) *ThisIsASchemaUpdate {
+func (u *ThisIsASchemaUpdate) WhereThisIsAnIndexColsIn(args ...string) *ThisIsASchemaUpdate {
 	sb := strings.Builder{}
 	sb.WriteString("thisIsAnIndexCols IN (")
 	for index, v := range args {
@@ -586,6 +609,7 @@ func (s *ThisIsASchemaUpdate) WhereThisIsAnIndexColsIn(args ...string) *ThisIsAS
 		}
 	}
 	sb.WriteString(")")
-	s.handler = s.handler.Where(sq.Expr(sb.String()))
-	return s
+	u.handler = u.handler.Where(sq.Expr(sb.String()))
+	u.whereFlag = true
+	return u
 }
