@@ -106,7 +106,8 @@ func scan(scanPath string) []*Schema {
 						sepIndex := strings.Index(tmpDoc, ":")
 						docKey, docValue := strings.Trim(tmpDoc[:sepIndex], " "), tmpDoc[sepIndex+1:]
 						switch docKey {
-						case "Name": tmpSchema.SchemaName = strings.Trim(docValue, " ")
+						case "Name":
+							tmpSchema.SchemaName = strings.Trim(docValue, " ")
 						default:
 						}
 					}
@@ -118,36 +119,38 @@ func scan(scanPath string) []*Schema {
 						Type:       field.Type.(*ast.Ident).Name,
 					}
 					if field != nil {
+						if field.Tag == nil {
+							continue
+						}
 						cols.Tag = strings.TrimRight(field.Tag.Value, " ")
 						tagStr, err := strconv.Unquote(cols.Tag)
 						if err != nil {
 							panic(err)
 						}
-						if tagStr == "-" {
-							continue
-						}
 						tv := reflect.StructTag(tagStr)
 						value, ok := tv.Lookup(tagKey)
-						if ok {
-							for _, valueStr := range strings.Split(value, ";") {
-								var vk, vv string
-								spIndex := strings.Index(valueStr, ":")
-								if spIndex != -1 {
-									vk = valueStr[:spIndex]
-									vv = valueStr[spIndex+1:]
-								}else {
-									vk = valueStr
-								}
-								if vk == tagPrimary {
-									tmpSchema.Primary = cols
-								}
-								if vk == tagIndex {
-									cols.IsIndex = true
-									tmpSchema.Index[vv] = append(tmpSchema.Index[vv], cols)
-								}
-								if vk == tagShard {
-									tmpSchema.ShardCols = cols
-								}
+						println(value)
+						if !ok || value == "_" {
+							continue
+						}
+						for _, valueStr := range strings.Split(value, ";") {
+							var vk, vv string
+							spIndex := strings.Index(valueStr, ":")
+							if spIndex != -1 {
+								vk = valueStr[:spIndex]
+								vv = valueStr[spIndex+1:]
+							} else {
+								vk = valueStr
+							}
+							if vk == tagPrimary {
+								tmpSchema.Primary = cols
+							}
+							if vk == tagIndex {
+								cols.IsIndex = true
+								tmpSchema.Index[vv] = append(tmpSchema.Index[vv], cols)
+							}
+							if vk == tagShard {
+								tmpSchema.ShardCols = cols
 							}
 						}
 
