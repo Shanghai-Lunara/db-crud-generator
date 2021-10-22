@@ -123,6 +123,9 @@ func scan(scanPath string) []*Schema {
 						if err != nil {
 							panic(err)
 						}
+						if tagStr == "-" {
+							continue
+						}
 						tv := reflect.StructTag(tagStr)
 						value, ok := tv.Lookup(tagKey)
 						if ok {
