@@ -129,7 +129,6 @@ func scan(scanPath string) []*Schema {
 						}
 						tv := reflect.StructTag(tagStr)
 						value, ok := tv.Lookup(tagKey)
-						println(value)
 						if !ok || value == "_" {
 							continue
 						}
