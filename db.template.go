@@ -100,7 +100,7 @@ func (i *{{$.Name}}Insert) build() error {
 			if !ok {
 				switch k {
 {{range $k, $v := .Cols}}
-				case "{{$v.SchemaName}}": v = {{if eq $v.Type "int32"}}0{{end}}{{if eq $v.Type "int64"}}0{{end}}{{if eq $v.Type "string"}}""{{end}}{{if eq $v.Type "bool"}}false{{end}}
+				case "{{$v.SchemaName}}": v = {{if eq $v.Type "int32"}}0{{end}}{{if eq $v.Type "int64"}}0{{end}}{{if eq $v.Type "float32"}}0{{end}}{{if eq $v.Type "float64"}}0{{end}}{{if eq $v.Type "string"}}""{{end}}{{if eq $v.Type "bool"}}false{{end}}
 {{end}}
 				}
 			}
