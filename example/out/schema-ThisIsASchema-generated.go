@@ -16,15 +16,15 @@ import (
 
 func GetThisIsASchemaSchemaName() string { return "this_is_a_schema" }
 
-func GetIdColsNameIdColsName() string {
+func GetThisIsASchemaColsNameIdColsName() string {
 	return "id"
 }
 
-func GetThisIsAnIndexColsColsNameThisIsAnIndexColsColsName() string {
+func GetThisIsASchemaColsNameThisIsAnIndexColsColsName() string {
 	return "thisIsAnIndexCols"
 }
 
-func GetIgnoreColsColsNameIgnoreColsColsName() string {
+func GetThisIsASchemaColsNameIgnoreColsColsName() string {
 	return "ignoreCols"
 }
 

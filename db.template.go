@@ -21,7 +21,7 @@ import (
 func Get{{.Name}}SchemaName({{if $isShard}}v {{.ShardCols.Type}}{{end}}) string { {{if $isShard}}return fmt.Sprintf("{{.SchemaName}}_%d", v%{{.Shard}}){{else}}return "{{.SchemaName}}"{{end}} }
 
 {{range $k, $v := .Cols}}
-func Get{{.Name}}ColsName{{$v.Name}}ColsName() string {
+func Get{{$.Name}}ColsName{{$v.Name}}ColsName() string {
 	return "{{$v.SchemaName}}"
 }
 {{end}}
