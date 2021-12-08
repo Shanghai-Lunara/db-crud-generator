@@ -16,6 +16,18 @@ import (
 
 func GetThisIsASchemaSchemaName() string { return "this_is_a_schema" }
 
+func GetIdColsNameIdColsName() string {
+	return "id"
+}
+
+func GetThisIsAnIndexColsColsNameThisIsAnIndexColsColsName() string {
+	return "thisIsAnIndexCols"
+}
+
+func GetIgnoreColsColsNameIgnoreColsColsName() string {
+	return "ignoreCols"
+}
+
 type ThisIsASchemaInsert struct {
 	handler sq.InsertBuilder
 	cache   map[int32]map[string]interface{}
@@ -66,6 +78,9 @@ func (i *ThisIsASchemaInsert) build() error {
 
 				case "thisIsAnIndexCols":
 					v = ""
+
+				case "ignoreCols":
+					v = false
 
 				}
 			}
@@ -125,6 +140,11 @@ func (i *ThisIsASchemaInsert) Id(index int32, v int32) *ThisIsASchemaInsert {
 
 func (i *ThisIsASchemaInsert) ThisIsAnIndexCols(index int32, v string) *ThisIsASchemaInsert {
 	i.setValue(index, "thisIsAnIndexCols", v)
+	return i
+}
+
+func (i *ThisIsASchemaInsert) IgnoreCols(index int32, v bool) *ThisIsASchemaInsert {
+	i.setValue(index, "ignoreCols", v)
 	return i
 }
 
@@ -205,6 +225,7 @@ func (s *ThisIsASchemaSelect) Query(ctx context.Context, db *sql.DB) ([]*model.T
 
 		result.Id = s.tmp.Id
 		result.ThisIsAnIndexCols = s.tmp.ThisIsAnIndexCols
+		result.IgnoreCols = s.tmp.IgnoreCols
 
 		results = append(results, result)
 	}
@@ -239,6 +260,7 @@ func (s *ThisIsASchemaSelect) QueryTx(ctx context.Context, tx *sql.Tx) ([]*model
 
 		result.Id = s.tmp.Id
 		result.ThisIsAnIndexCols = s.tmp.ThisIsAnIndexCols
+		result.IgnoreCols = s.tmp.IgnoreCols
 
 		results = append(results, result)
 	}
@@ -275,6 +297,7 @@ func (s *ThisIsASchemaSelect) QueryRow(ctx context.Context, db *sql.DB) (*model.
 
 	result.Id = s.tmp.Id
 	result.ThisIsAnIndexCols = s.tmp.ThisIsAnIndexCols
+	result.IgnoreCols = s.tmp.IgnoreCols
 
 	return result, nil
 }
@@ -313,6 +336,7 @@ func (s *ThisIsASchemaSelect) QueryRowTx(ctx context.Context, tx *sql.Tx) (*mode
 
 	result.Id = s.tmp.Id
 	result.ThisIsAnIndexCols = s.tmp.ThisIsAnIndexCols
+	result.IgnoreCols = s.tmp.IgnoreCols
 
 	return result, nil
 }
@@ -322,6 +346,8 @@ func (s *ThisIsASchemaSelect) Select() *ThisIsASchemaSelect {
 	s.fieldMap["id"] = &(s.tmp.Id)
 	s.handler = s.handler.Columns("`thisIsAnIndexCols`")
 	s.fieldMap["thisIsAnIndexCols"] = &(s.tmp.ThisIsAnIndexCols)
+	s.handler = s.handler.Columns("`ignoreCols`")
+	s.fieldMap["ignoreCols"] = &(s.tmp.IgnoreCols)
 
 	return s
 }
@@ -451,6 +477,12 @@ func (s *ThisIsASchemaSelect) WhereThisIsAnIndexColsIn(args ...string) *ThisIsAS
 	}
 	sb.WriteString(")")
 	s.handler = s.handler.Where(sq.Expr(sb.String()))
+	return s
+}
+
+func (s *ThisIsASchemaSelect) SelectIgnoreCols() *ThisIsASchemaSelect {
+	s.handler = s.handler.Columns("`ignoreCols`")
+	s.fieldMap["ignoreCols"] = &(s.tmp.IgnoreCols)
 	return s
 }
 
@@ -617,5 +649,10 @@ func (u *ThisIsASchemaUpdate) WhereThisIsAnIndexColsIn(args ...string) *ThisIsAS
 	sb.WriteString(")")
 	u.handler = u.handler.Where(sq.Expr(sb.String()))
 	u.whereFlag = true
+	return u
+}
+
+func (u *ThisIsASchemaUpdate) IgnoreCols(v bool) *ThisIsASchemaUpdate {
+	u.handler = u.handler.Set("`ignoreCols`", v)
 	return u
 }
