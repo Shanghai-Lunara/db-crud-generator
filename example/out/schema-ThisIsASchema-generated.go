@@ -10,6 +10,8 @@ import (
 	model "github.com/Shanghai-Lunara/db-crud-generator/example/input"
 	sq "github.com/Shanghai-Lunara/squirrel"
 	"strings"
+	// custom model imports
+	"time"
 )
 
 //
@@ -26,6 +28,10 @@ func GetThisIsASchemaColsNameThisIsAnIndexCols() string {
 
 func GetThisIsASchemaColsNameIgnoreCols() string {
 	return "ignoreCols"
+}
+
+func GetThisIsASchemaColsNameCreateTime() string {
+	return "createTime"
 }
 
 type ThisIsASchemaInsert struct {
@@ -75,12 +81,19 @@ func (i *ThisIsASchemaInsert) build() error {
 
 				case "id":
 					v = 0
+					break
 
 				case "thisIsAnIndexCols":
 					v = ""
+					break
 
 				case "ignoreCols":
 					v = false
+					break
+
+				case "createTime":
+					v = time.Unix(0, 0)
+					break
 
 				}
 			}
@@ -145,6 +158,11 @@ func (i *ThisIsASchemaInsert) ThisIsAnIndexCols(index int32, v string) *ThisIsAS
 
 func (i *ThisIsASchemaInsert) IgnoreCols(index int32, v bool) *ThisIsASchemaInsert {
 	i.setValue(index, "ignoreCols", v)
+	return i
+}
+
+func (i *ThisIsASchemaInsert) CreateTime(index int32, v time.Time) *ThisIsASchemaInsert {
+	i.setValue(index, "createTime", v)
 	return i
 }
 
@@ -226,6 +244,7 @@ func (s *ThisIsASchemaSelect) Query(ctx context.Context, db *sql.DB) ([]*model.T
 		result.Id = s.tmp.Id
 		result.ThisIsAnIndexCols = s.tmp.ThisIsAnIndexCols
 		result.IgnoreCols = s.tmp.IgnoreCols
+		result.CreateTime = s.tmp.CreateTime
 
 		results = append(results, result)
 	}
@@ -261,6 +280,7 @@ func (s *ThisIsASchemaSelect) QueryTx(ctx context.Context, tx *sql.Tx) ([]*model
 		result.Id = s.tmp.Id
 		result.ThisIsAnIndexCols = s.tmp.ThisIsAnIndexCols
 		result.IgnoreCols = s.tmp.IgnoreCols
+		result.CreateTime = s.tmp.CreateTime
 
 		results = append(results, result)
 	}
@@ -298,6 +318,7 @@ func (s *ThisIsASchemaSelect) QueryRow(ctx context.Context, db *sql.DB) (*model.
 	result.Id = s.tmp.Id
 	result.ThisIsAnIndexCols = s.tmp.ThisIsAnIndexCols
 	result.IgnoreCols = s.tmp.IgnoreCols
+	result.CreateTime = s.tmp.CreateTime
 
 	return result, nil
 }
@@ -337,6 +358,7 @@ func (s *ThisIsASchemaSelect) QueryRowTx(ctx context.Context, tx *sql.Tx) (*mode
 	result.Id = s.tmp.Id
 	result.ThisIsAnIndexCols = s.tmp.ThisIsAnIndexCols
 	result.IgnoreCols = s.tmp.IgnoreCols
+	result.CreateTime = s.tmp.CreateTime
 
 	return result, nil
 }
@@ -348,6 +370,8 @@ func (s *ThisIsASchemaSelect) Select() *ThisIsASchemaSelect {
 	s.fieldMap["thisIsAnIndexCols"] = &(s.tmp.ThisIsAnIndexCols)
 	s.handler = s.handler.Columns("`ignoreCols`")
 	s.fieldMap["ignoreCols"] = &(s.tmp.IgnoreCols)
+	s.handler = s.handler.Columns("`createTime`")
+	s.fieldMap["createTime"] = &(s.tmp.CreateTime)
 
 	return s
 }
@@ -483,6 +507,12 @@ func (s *ThisIsASchemaSelect) WhereThisIsAnIndexColsIn(args ...string) *ThisIsAS
 func (s *ThisIsASchemaSelect) SelectIgnoreCols() *ThisIsASchemaSelect {
 	s.handler = s.handler.Columns("`ignoreCols`")
 	s.fieldMap["ignoreCols"] = &(s.tmp.IgnoreCols)
+	return s
+}
+
+func (s *ThisIsASchemaSelect) SelectCreateTime() *ThisIsASchemaSelect {
+	s.handler = s.handler.Columns("`createTime`")
+	s.fieldMap["createTime"] = &(s.tmp.CreateTime)
 	return s
 }
 
@@ -654,5 +684,10 @@ func (u *ThisIsASchemaUpdate) WhereThisIsAnIndexColsIn(args ...string) *ThisIsAS
 
 func (u *ThisIsASchemaUpdate) IgnoreCols(v bool) *ThisIsASchemaUpdate {
 	u.handler = u.handler.Set("`ignoreCols`", v)
+	return u
+}
+
+func (u *ThisIsASchemaUpdate) CreateTime(v time.Time) *ThisIsASchemaUpdate {
+	u.handler = u.handler.Set("`createTime`", v)
 	return u
 }

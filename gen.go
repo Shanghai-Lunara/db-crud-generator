@@ -27,14 +27,16 @@ type Schema struct {
 	Index         map[string][]*Cols
 	Shard         int
 	ShardCols     *Cols
+	Imports       []string
 }
 
 type Cols struct {
-	Name       string
-	SchemaName string
-	Type       string
-	Tag        string
-	IsIndex    bool
+	Name        string
+	SchemaName  string
+	Type        string
+	Tag         string
+	IsIndex     bool
+	TypeDefault string
 }
 
 const (
@@ -83,9 +85,18 @@ func scan(scanPath string) []*Schema {
 		return nil
 	}
 	var schemaList []*Schema
-
 	for _, v := range f {
 		for kk, ff := range v.Files {
+			imports := make([]string, 0, len(ff.Imports))
+			for _, imp := range ff.Imports {
+				sb := strings.Builder{}
+				if imp.Name != nil && imp.Name.Name != "" {
+					sb.WriteString(imp.Name.Name)
+					sb.WriteString(" ")
+				}
+				sb.WriteString(imp.Path.Value)
+				imports = append(imports, sb.String())
+			}
 			for _, a := range ff.Scope.Objects {
 				if a.Kind != ast.Typ {
 					continue
@@ -96,6 +107,7 @@ func scan(scanPath string) []*Schema {
 				tmpSchema.PackagePath = filepath.Dir(kk)
 				tmpSchema.SchemaName = Camel2Snake(a.Name)
 				tmpSchema.Index = make(map[string][]*Cols)
+				tmpSchema.Imports = imports
 				if len(ff.Comments) > 0 {
 					for _, docLine := range ff.Comments[0].List {
 						tmpDoc := strings.Trim(strings.TrimLeft(docLine.Text, "//"), " ")
@@ -113,10 +125,42 @@ func scan(scanPath string) []*Schema {
 					}
 				}
 				for _, field := range a.Decl.(*ast.TypeSpec).Type.(*ast.StructType).Fields.List {
+					var typStr string
+					switch field.Type.(type) {
+					case *ast.Ident:
+						typStr = field.Type.(*ast.Ident).Name
+						break
+					case *ast.SelectorExpr:
+						tmp := field.Type.(*ast.SelectorExpr)
+						// todo tmp.X的类型也可能需要断言
+						typStr = fmt.Sprintf("%s.%s", tmp.X.(*ast.Ident).Name, tmp.Sel.Name)
+						break
+					default:
+						continue
+					}
 					cols := &Cols{
 						Name:       field.Names[0].Name,
 						SchemaName: CapLow(field.Names[0].Name),
-						Type:       field.Type.(*ast.Ident).Name,
+						Type:       typStr,
+					}
+					switch cols.Type {
+					case "int32", "int64", "int8", "int16", "int":
+						cols.TypeDefault = "0"
+						break
+					case "float32", "float64", "float8", "float16", "float":
+						cols.TypeDefault = "0"
+						break
+					case "string":
+						cols.TypeDefault = "\"\""
+						break
+					case "bool":
+						cols.TypeDefault = "false"
+						break
+					case "time.Time":
+						cols.TypeDefault = "time.Unix(0, 0)"
+						break
+					default:
+						cols.TypeDefault = "nil"
 					}
 					if field != nil {
 						if field.Tag == nil {
