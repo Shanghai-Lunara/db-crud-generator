@@ -93,15 +93,11 @@ func (i *{{$.Name}}Insert) build() error {
 	flag := false
 	i.handler = sq.Insert("{{.SchemaName}}")
 
-	var cols []string
-	for k := range i.cols {
-		cols = append(cols, fmt.Sprintf("` + "`%s`\"" + `, k))
-	}
 	for _, argMap := range i.cache {
 		row := make([]interface{}, 0, len(i.cols))
-		for _, k := range cols {
+		for k := range i.cols {
 			if !flag {
-				i.handler = i.handler.Columns(k)
+				i.handler = i.handler.Columns(fmt.Sprintf("` + "`%s`\"" + `, k))
 			}
 			v, ok := argMap[k]
 			if !ok {
