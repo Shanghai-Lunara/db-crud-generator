@@ -95,7 +95,7 @@ func (i *{{$.Name}}Insert) build() error {
 
 	var cols []string
 	for k := range i.cols {
-		cols = append(cols, k)
+		cols = append(cols, fmt.Sprintf("` + "`%s`\"" + `, k))
 	}
 	for _, argMap := range i.cache {
 		row := make([]interface{}, 0, len(i.cols))
@@ -446,7 +446,7 @@ func (s *{{$.Name}}Select) OrderBy{{$v.Name}}(desc bool) *{{$.Name}}Select {
 
 func (s *{{$.Name}}Select) Where{{$v.Name}}In(args ...{{$v.Type}}) *{{$.Name}}Select {
 	sb := strings.Builder{}
-	sb.WriteString("{{$v.SchemaName}} IN (")
+	sb.WriteString("`+"`{{$v.SchemaName}}`" +` IN (")
 	for index, v := range args {
 		sb.WriteString(fmt.Sprintf("%v", v))
 		if index < len(args) - 1 {
@@ -459,8 +459,6 @@ func (s *{{$.Name}}Select) Where{{$v.Name}}In(args ...{{$v.Type}}) *{{$.Name}}Se
 }
 {{end}}
 {{end}}
-
-
 
 
 
@@ -562,7 +560,7 @@ func (u *{{$.Name}}Update) Where{{$v.Name}}Like(v {{$v.Type}}) *{{$.Name}}Update
 
 func (u *{{$.Name}}Update) Where{{$v.Name}}In(args ...{{$v.Type}}) *{{$.Name}}Update {
 	sb := strings.Builder{}
-	sb.WriteString("{{$v.SchemaName}} IN (")
+	sb.WriteString("`+"`{{$v.SchemaName}}`" +` IN (")
 	for index, v := range args {
 		sb.WriteString(fmt.Sprintf("%v", v))
 		if index < len(args) - 1 {

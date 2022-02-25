@@ -67,7 +67,7 @@ func (i *ThisIsASchemaInsert) build() error {
 
 	var cols []string
 	for k := range i.cols {
-		cols = append(cols, k)
+		cols = append(cols, fmt.Sprintf("`%s`", k))
 	}
 	for _, argMap := range i.cache {
 		row := make([]interface{}, 0, len(i.cols))
@@ -428,7 +428,7 @@ func (s *ThisIsASchemaSelect) OrderById(desc bool) *ThisIsASchemaSelect {
 
 func (s *ThisIsASchemaSelect) WhereIdIn(args ...int32) *ThisIsASchemaSelect {
 	sb := strings.Builder{}
-	sb.WriteString("id IN (")
+	sb.WriteString("`id` IN (")
 	for index, v := range args {
 		sb.WriteString(fmt.Sprintf("%v", v))
 		if index < len(args)-1 {
@@ -492,7 +492,7 @@ func (s *ThisIsASchemaSelect) OrderByThisIsAnIndexCols(desc bool) *ThisIsASchema
 
 func (s *ThisIsASchemaSelect) WhereThisIsAnIndexColsIn(args ...string) *ThisIsASchemaSelect {
 	sb := strings.Builder{}
-	sb.WriteString("thisIsAnIndexCols IN (")
+	sb.WriteString("`thisIsAnIndexCols` IN (")
 	for index, v := range args {
 		sb.WriteString(fmt.Sprintf("%v", v))
 		if index < len(args)-1 {
@@ -513,6 +513,64 @@ func (s *ThisIsASchemaSelect) SelectIgnoreCols() *ThisIsASchemaSelect {
 func (s *ThisIsASchemaSelect) SelectCreateTime() *ThisIsASchemaSelect {
 	s.handler = s.handler.Columns("`createTime`")
 	s.fieldMap["createTime"] = &(s.tmp.CreateTime)
+	return s
+}
+
+func (s *ThisIsASchemaSelect) WhereCreateTimeEq(v time.Time) *ThisIsASchemaSelect {
+	s.handler = s.handler.Where(sq.Eq{"`createTime`": v})
+	return s
+}
+
+func (s *ThisIsASchemaSelect) WhereCreateTimeNotEq(v time.Time) *ThisIsASchemaSelect {
+	s.handler = s.handler.Where(sq.NotEq{"`createTime`": v})
+	return s
+}
+
+func (s *ThisIsASchemaSelect) WhereCreateTimeGt(v time.Time) *ThisIsASchemaSelect {
+	s.handler = s.handler.Where(sq.Gt{"`createTime`": v})
+	return s
+}
+
+func (s *ThisIsASchemaSelect) WhereCreateTimeLt(v time.Time) *ThisIsASchemaSelect {
+	s.handler = s.handler.Where(sq.Lt{"`createTime`": v})
+	return s
+}
+
+func (s *ThisIsASchemaSelect) WhereCreateTimeGtOrEq(v time.Time) *ThisIsASchemaSelect {
+	s.handler = s.handler.Where(sq.GtOrEq{"`createTime`": v})
+	return s
+}
+
+func (s *ThisIsASchemaSelect) WhereCreateTimeLtOrEq(v time.Time) *ThisIsASchemaSelect {
+	s.handler = s.handler.Where(sq.GtOrEq{"`createTime`": v})
+	return s
+}
+
+func (s *ThisIsASchemaSelect) WhereCreateTimeLike(v time.Time) *ThisIsASchemaSelect {
+	s.handler = s.handler.Where(sq.Like{"`createTime`": v})
+	return s
+}
+
+func (s *ThisIsASchemaSelect) OrderByCreateTime(desc bool) *ThisIsASchemaSelect {
+	if desc {
+		s.handler = s.handler.OrderBy("createTime DESC")
+	} else {
+		s.handler = s.handler.OrderBy("createTime ASC")
+	}
+	return s
+}
+
+func (s *ThisIsASchemaSelect) WhereCreateTimeIn(args ...time.Time) *ThisIsASchemaSelect {
+	sb := strings.Builder{}
+	sb.WriteString("`createTime` IN (")
+	for index, v := range args {
+		sb.WriteString(fmt.Sprintf("%v", v))
+		if index < len(args)-1 {
+			sb.WriteString(", ")
+		}
+	}
+	sb.WriteString(")")
+	s.handler = s.handler.Where(sq.Expr(sb.String()))
 	return s
 }
 
@@ -607,7 +665,7 @@ func (u *ThisIsASchemaUpdate) WhereIdLike(v int32) *ThisIsASchemaUpdate {
 
 func (u *ThisIsASchemaUpdate) WhereIdIn(args ...int32) *ThisIsASchemaUpdate {
 	sb := strings.Builder{}
-	sb.WriteString("id IN (")
+	sb.WriteString("`id` IN (")
 	for index, v := range args {
 		sb.WriteString(fmt.Sprintf("%v", v))
 		if index < len(args)-1 {
@@ -669,7 +727,7 @@ func (u *ThisIsASchemaUpdate) WhereThisIsAnIndexColsLike(v string) *ThisIsASchem
 
 func (u *ThisIsASchemaUpdate) WhereThisIsAnIndexColsIn(args ...string) *ThisIsASchemaUpdate {
 	sb := strings.Builder{}
-	sb.WriteString("thisIsAnIndexCols IN (")
+	sb.WriteString("`thisIsAnIndexCols` IN (")
 	for index, v := range args {
 		sb.WriteString(fmt.Sprintf("%v", v))
 		if index < len(args)-1 {
@@ -689,5 +747,62 @@ func (u *ThisIsASchemaUpdate) IgnoreCols(v bool) *ThisIsASchemaUpdate {
 
 func (u *ThisIsASchemaUpdate) CreateTime(v time.Time) *ThisIsASchemaUpdate {
 	u.handler = u.handler.Set("`createTime`", v)
+	return u
+}
+
+func (u *ThisIsASchemaUpdate) WhereCreateTimeEq(v time.Time) *ThisIsASchemaUpdate {
+	u.handler = u.handler.Where(sq.Eq{"`createTime`": v})
+	u.whereFlag = true
+	return u
+}
+
+func (u *ThisIsASchemaUpdate) WhereCreateTimeNotEq(v time.Time) *ThisIsASchemaUpdate {
+	u.handler = u.handler.Where(sq.NotEq{"`createTime`": v})
+	u.whereFlag = true
+	return u
+}
+
+func (u *ThisIsASchemaUpdate) WhereCreateTimeGt(v time.Time) *ThisIsASchemaUpdate {
+	u.handler = u.handler.Where(sq.Gt{"`createTime`": v})
+	u.whereFlag = true
+	return u
+}
+
+func (u *ThisIsASchemaUpdate) WhereCreateTimeLt(v time.Time) *ThisIsASchemaUpdate {
+	u.handler = u.handler.Where(sq.Lt{"`createTime`": v})
+	u.whereFlag = true
+	return u
+}
+
+func (u *ThisIsASchemaUpdate) WhereCreateTimeGtOrEq(v time.Time) *ThisIsASchemaUpdate {
+	u.handler = u.handler.Where(sq.GtOrEq{"`createTime`": v})
+	u.whereFlag = true
+	return u
+}
+
+func (u *ThisIsASchemaUpdate) WhereCreateTimeLtOrEq(v time.Time) *ThisIsASchemaUpdate {
+	u.handler = u.handler.Where(sq.GtOrEq{"`createTime`": v})
+	u.whereFlag = true
+	return u
+}
+
+func (u *ThisIsASchemaUpdate) WhereCreateTimeLike(v time.Time) *ThisIsASchemaUpdate {
+	u.handler = u.handler.Where(sq.Like{"`createTime`": v})
+	u.whereFlag = true
+	return u
+}
+
+func (u *ThisIsASchemaUpdate) WhereCreateTimeIn(args ...time.Time) *ThisIsASchemaUpdate {
+	sb := strings.Builder{}
+	sb.WriteString("`createTime` IN (")
+	for index, v := range args {
+		sb.WriteString(fmt.Sprintf("%v", v))
+		if index < len(args)-1 {
+			sb.WriteString(", ")
+		}
+	}
+	sb.WriteString(")")
+	u.handler = u.handler.Where(sq.Expr(sb.String()))
+	u.whereFlag = true
 	return u
 }
