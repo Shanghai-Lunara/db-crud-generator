@@ -422,7 +422,7 @@ func (s *{{$.Name}}Select) Where{{$v.Name}}GtOrEq(v {{$v.Type}}) *{{$.Name}}Sele
 }
 
 func (s *{{$.Name}}Select) Where{{$v.Name}}LtOrEq(v {{$v.Type}}) *{{$.Name}}Select {
-	s.handler = s.handler.Where(sq.GtOrEq{"` + "`{{$v.SchemaName}}`" + `": v})
+	s.handler = s.handler.Where(sq.LtOrEq{"` + "`{{$v.SchemaName}}`" + `": v})
 	return s
 }
 
@@ -543,7 +543,7 @@ func (u *{{$.Name}}Update) Where{{$v.Name}}GtOrEq(v {{$v.Type}}) *{{$.Name}}Upda
 }
 
 func (u *{{$.Name}}Update) Where{{$v.Name}}LtOrEq(v {{$v.Type}}) *{{$.Name}}Update {
-	u.handler = u.handler.Where(sq.GtOrEq{"` + "`{{$v.SchemaName}}`" + `": v})
+	u.handler = u.handler.Where(sq.LtOrEq{"` + "`{{$v.SchemaName}}`" + `": v})
 	u.whereFlag = true
 	return u
 }
