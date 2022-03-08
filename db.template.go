@@ -205,12 +205,12 @@ func New{{.Name}}Select() *{{.Name}}Select {
 	}
 }
 
-func (s *{{.Name}}Select) Count(db *sql.DB) (int, error) {
+func (s *{{.Name}}Select) Count(ctx context.Context, db *sql.DB) (int, error) {
 	sqlStr, args, err := s.handler.Column("COUNT(1)").ToSql()
 	if err != nil {
 		return 0, err
 	}
-	rows, err := db.QueryContext(context.Background(), sqlStr, args...)
+	rows, err := db.QueryContext(ctx, sqlStr, args...)
 	if err != nil {
 		return 0, err
 	}
@@ -437,6 +437,11 @@ func (s *{{$.Name}}Select) OrderBy{{$v.Name}}(desc bool) *{{$.Name}}Select {
 	} else {
 		s.handler = s.handler.OrderBy("{{$v.SchemaName}} ASC")
 	}
+	return s
+}
+
+func (s *{{$.Name}}Select) GroupBy{{$v.Name}}() *{{$.Name}}Select {
+	s.handler = s.handler.GroupBy("{{$v.SchemaName}}")
 	return s
 }
 

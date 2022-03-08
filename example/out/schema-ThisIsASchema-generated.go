@@ -190,12 +190,12 @@ func NewThisIsASchemaSelect() *ThisIsASchemaSelect {
 	}
 }
 
-func (s *ThisIsASchemaSelect) Count(db *sql.DB) (int, error) {
+func (s *ThisIsASchemaSelect) Count(ctx context.Context, db *sql.DB) (int, error) {
 	sqlStr, args, err := s.handler.Column("COUNT(1)").ToSql()
 	if err != nil {
 		return 0, err
 	}
-	rows, err := db.QueryContext(context.Background(), sqlStr, args...)
+	rows, err := db.QueryContext(ctx, sqlStr, args...)
 	if err != nil {
 		return 0, err
 	}
@@ -441,6 +441,11 @@ func (s *ThisIsASchemaSelect) OrderById(desc bool) *ThisIsASchemaSelect {
 	return s
 }
 
+func (s *ThisIsASchemaSelect) GroupById() *ThisIsASchemaSelect {
+	s.handler = s.handler.GroupBy("id")
+	return s
+}
+
 func (s *ThisIsASchemaSelect) WhereIdIn(args ...int32) *ThisIsASchemaSelect {
 	sb := strings.Builder{}
 	sb.WriteString("`id` IN (")
@@ -502,6 +507,11 @@ func (s *ThisIsASchemaSelect) OrderByThisIsAnIndexCols(desc bool) *ThisIsASchema
 	} else {
 		s.handler = s.handler.OrderBy("thisIsAnIndexCols ASC")
 	}
+	return s
+}
+
+func (s *ThisIsASchemaSelect) GroupByThisIsAnIndexCols() *ThisIsASchemaSelect {
+	s.handler = s.handler.GroupBy("thisIsAnIndexCols")
 	return s
 }
 
@@ -575,6 +585,11 @@ func (s *ThisIsASchemaSelect) OrderByCreateTime(desc bool) *ThisIsASchemaSelect 
 	return s
 }
 
+func (s *ThisIsASchemaSelect) GroupByCreateTime() *ThisIsASchemaSelect {
+	s.handler = s.handler.GroupBy("createTime")
+	return s
+}
+
 func (s *ThisIsASchemaSelect) WhereCreateTimeIn(args ...time.Time) *ThisIsASchemaSelect {
 	sb := strings.Builder{}
 	sb.WriteString("`createTime` IN (")
@@ -636,6 +651,11 @@ func (s *ThisIsASchemaSelect) OrderByByteType(desc bool) *ThisIsASchemaSelect {
 	} else {
 		s.handler = s.handler.OrderBy("byteType ASC")
 	}
+	return s
+}
+
+func (s *ThisIsASchemaSelect) GroupByByteType() *ThisIsASchemaSelect {
+	s.handler = s.handler.GroupBy("byteType")
 	return s
 }
 
