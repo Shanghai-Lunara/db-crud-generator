@@ -34,6 +34,10 @@ func GetThisIsASchemaColsNameCreateTime() string {
 	return "createTime"
 }
 
+func GetThisIsASchemaColsNameByteType() string {
+	return "byteType"
+}
+
 type ThisIsASchemaInsert struct {
 	handler sq.InsertBuilder
 	cache   map[int32]map[string]interface{}
@@ -89,6 +93,10 @@ func (i *ThisIsASchemaInsert) build() error {
 
 				case "createTime":
 					v = time.Unix(0, 0)
+					break
+
+				case "byteType":
+					v = nil
 					break
 
 				}
@@ -159,6 +167,11 @@ func (i *ThisIsASchemaInsert) IgnoreCols(index int32, v bool) *ThisIsASchemaInse
 
 func (i *ThisIsASchemaInsert) CreateTime(index int32, v time.Time) *ThisIsASchemaInsert {
 	i.setValue(index, "createTime", v)
+	return i
+}
+
+func (i *ThisIsASchemaInsert) ByteType(index int32, v []byte) *ThisIsASchemaInsert {
+	i.setValue(index, "byteType", v)
 	return i
 }
 
@@ -241,6 +254,7 @@ func (s *ThisIsASchemaSelect) Query(ctx context.Context, db *sql.DB) ([]*model.T
 		result.ThisIsAnIndexCols = s.tmp.ThisIsAnIndexCols
 		result.IgnoreCols = s.tmp.IgnoreCols
 		result.CreateTime = s.tmp.CreateTime
+		result.ByteType = s.tmp.ByteType
 
 		results = append(results, result)
 	}
@@ -277,6 +291,7 @@ func (s *ThisIsASchemaSelect) QueryTx(ctx context.Context, tx *sql.Tx) ([]*model
 		result.ThisIsAnIndexCols = s.tmp.ThisIsAnIndexCols
 		result.IgnoreCols = s.tmp.IgnoreCols
 		result.CreateTime = s.tmp.CreateTime
+		result.ByteType = s.tmp.ByteType
 
 		results = append(results, result)
 	}
@@ -315,6 +330,7 @@ func (s *ThisIsASchemaSelect) QueryRow(ctx context.Context, db *sql.DB) (*model.
 	result.ThisIsAnIndexCols = s.tmp.ThisIsAnIndexCols
 	result.IgnoreCols = s.tmp.IgnoreCols
 	result.CreateTime = s.tmp.CreateTime
+	result.ByteType = s.tmp.ByteType
 
 	return result, nil
 }
@@ -355,6 +371,7 @@ func (s *ThisIsASchemaSelect) QueryRowTx(ctx context.Context, tx *sql.Tx) (*mode
 	result.ThisIsAnIndexCols = s.tmp.ThisIsAnIndexCols
 	result.IgnoreCols = s.tmp.IgnoreCols
 	result.CreateTime = s.tmp.CreateTime
+	result.ByteType = s.tmp.ByteType
 
 	return result, nil
 }
@@ -368,6 +385,8 @@ func (s *ThisIsASchemaSelect) Select() *ThisIsASchemaSelect {
 	s.fieldMap["ignoreCols"] = &(s.tmp.IgnoreCols)
 	s.handler = s.handler.Columns("`createTime`")
 	s.fieldMap["createTime"] = &(s.tmp.CreateTime)
+	s.handler = s.handler.Columns("`byteType`")
+	s.fieldMap["byteType"] = &(s.tmp.ByteType)
 
 	return s
 }
@@ -404,7 +423,7 @@ func (s *ThisIsASchemaSelect) WhereIdGtOrEq(v int32) *ThisIsASchemaSelect {
 }
 
 func (s *ThisIsASchemaSelect) WhereIdLtOrEq(v int32) *ThisIsASchemaSelect {
-	s.handler = s.handler.Where(sq.GtOrEq{"`id`": v})
+	s.handler = s.handler.Where(sq.LtOrEq{"`id`": v})
 	return s
 }
 
@@ -468,7 +487,7 @@ func (s *ThisIsASchemaSelect) WhereThisIsAnIndexColsGtOrEq(v string) *ThisIsASch
 }
 
 func (s *ThisIsASchemaSelect) WhereThisIsAnIndexColsLtOrEq(v string) *ThisIsASchemaSelect {
-	s.handler = s.handler.Where(sq.GtOrEq{"`thisIsAnIndexCols`": v})
+	s.handler = s.handler.Where(sq.LtOrEq{"`thisIsAnIndexCols`": v})
 	return s
 }
 
@@ -538,7 +557,7 @@ func (s *ThisIsASchemaSelect) WhereCreateTimeGtOrEq(v time.Time) *ThisIsASchemaS
 }
 
 func (s *ThisIsASchemaSelect) WhereCreateTimeLtOrEq(v time.Time) *ThisIsASchemaSelect {
-	s.handler = s.handler.Where(sq.GtOrEq{"`createTime`": v})
+	s.handler = s.handler.Where(sq.LtOrEq{"`createTime`": v})
 	return s
 }
 
@@ -559,6 +578,70 @@ func (s *ThisIsASchemaSelect) OrderByCreateTime(desc bool) *ThisIsASchemaSelect 
 func (s *ThisIsASchemaSelect) WhereCreateTimeIn(args ...time.Time) *ThisIsASchemaSelect {
 	sb := strings.Builder{}
 	sb.WriteString("`createTime` IN (")
+	for index, v := range args {
+		sb.WriteString(fmt.Sprintf("%v", v))
+		if index < len(args)-1 {
+			sb.WriteString(", ")
+		}
+	}
+	sb.WriteString(")")
+	s.handler = s.handler.Where(sq.Expr(sb.String()))
+	return s
+}
+
+func (s *ThisIsASchemaSelect) SelectByteType() *ThisIsASchemaSelect {
+	s.handler = s.handler.Columns("`byteType`")
+	s.fieldMap["byteType"] = &(s.tmp.ByteType)
+	return s
+}
+
+func (s *ThisIsASchemaSelect) WhereByteTypeEq(v []byte) *ThisIsASchemaSelect {
+	s.handler = s.handler.Where(sq.Eq{"`byteType`": v})
+	return s
+}
+
+func (s *ThisIsASchemaSelect) WhereByteTypeNotEq(v []byte) *ThisIsASchemaSelect {
+	s.handler = s.handler.Where(sq.NotEq{"`byteType`": v})
+	return s
+}
+
+func (s *ThisIsASchemaSelect) WhereByteTypeGt(v []byte) *ThisIsASchemaSelect {
+	s.handler = s.handler.Where(sq.Gt{"`byteType`": v})
+	return s
+}
+
+func (s *ThisIsASchemaSelect) WhereByteTypeLt(v []byte) *ThisIsASchemaSelect {
+	s.handler = s.handler.Where(sq.Lt{"`byteType`": v})
+	return s
+}
+
+func (s *ThisIsASchemaSelect) WhereByteTypeGtOrEq(v []byte) *ThisIsASchemaSelect {
+	s.handler = s.handler.Where(sq.GtOrEq{"`byteType`": v})
+	return s
+}
+
+func (s *ThisIsASchemaSelect) WhereByteTypeLtOrEq(v []byte) *ThisIsASchemaSelect {
+	s.handler = s.handler.Where(sq.LtOrEq{"`byteType`": v})
+	return s
+}
+
+func (s *ThisIsASchemaSelect) WhereByteTypeLike(v []byte) *ThisIsASchemaSelect {
+	s.handler = s.handler.Where(sq.Like{"`byteType`": v})
+	return s
+}
+
+func (s *ThisIsASchemaSelect) OrderByByteType(desc bool) *ThisIsASchemaSelect {
+	if desc {
+		s.handler = s.handler.OrderBy("byteType DESC")
+	} else {
+		s.handler = s.handler.OrderBy("byteType ASC")
+	}
+	return s
+}
+
+func (s *ThisIsASchemaSelect) WhereByteTypeIn(args ...[]byte) *ThisIsASchemaSelect {
+	sb := strings.Builder{}
+	sb.WriteString("`byteType` IN (")
 	for index, v := range args {
 		sb.WriteString(fmt.Sprintf("%v", v))
 		if index < len(args)-1 {
@@ -648,7 +731,7 @@ func (u *ThisIsASchemaUpdate) WhereIdGtOrEq(v int32) *ThisIsASchemaUpdate {
 }
 
 func (u *ThisIsASchemaUpdate) WhereIdLtOrEq(v int32) *ThisIsASchemaUpdate {
-	u.handler = u.handler.Where(sq.GtOrEq{"`id`": v})
+	u.handler = u.handler.Where(sq.LtOrEq{"`id`": v})
 	u.whereFlag = true
 	return u
 }
@@ -710,7 +793,7 @@ func (u *ThisIsASchemaUpdate) WhereThisIsAnIndexColsGtOrEq(v string) *ThisIsASch
 }
 
 func (u *ThisIsASchemaUpdate) WhereThisIsAnIndexColsLtOrEq(v string) *ThisIsASchemaUpdate {
-	u.handler = u.handler.Where(sq.GtOrEq{"`thisIsAnIndexCols`": v})
+	u.handler = u.handler.Where(sq.LtOrEq{"`thisIsAnIndexCols`": v})
 	u.whereFlag = true
 	return u
 }
@@ -777,7 +860,7 @@ func (u *ThisIsASchemaUpdate) WhereCreateTimeGtOrEq(v time.Time) *ThisIsASchemaU
 }
 
 func (u *ThisIsASchemaUpdate) WhereCreateTimeLtOrEq(v time.Time) *ThisIsASchemaUpdate {
-	u.handler = u.handler.Where(sq.GtOrEq{"`createTime`": v})
+	u.handler = u.handler.Where(sq.LtOrEq{"`createTime`": v})
 	u.whereFlag = true
 	return u
 }
@@ -791,6 +874,68 @@ func (u *ThisIsASchemaUpdate) WhereCreateTimeLike(v time.Time) *ThisIsASchemaUpd
 func (u *ThisIsASchemaUpdate) WhereCreateTimeIn(args ...time.Time) *ThisIsASchemaUpdate {
 	sb := strings.Builder{}
 	sb.WriteString("`createTime` IN (")
+	for index, v := range args {
+		sb.WriteString(fmt.Sprintf("%v", v))
+		if index < len(args)-1 {
+			sb.WriteString(", ")
+		}
+	}
+	sb.WriteString(")")
+	u.handler = u.handler.Where(sq.Expr(sb.String()))
+	u.whereFlag = true
+	return u
+}
+
+func (u *ThisIsASchemaUpdate) ByteType(v []byte) *ThisIsASchemaUpdate {
+	u.handler = u.handler.Set("`byteType`", v)
+	return u
+}
+
+func (u *ThisIsASchemaUpdate) WhereByteTypeEq(v []byte) *ThisIsASchemaUpdate {
+	u.handler = u.handler.Where(sq.Eq{"`byteType`": v})
+	u.whereFlag = true
+	return u
+}
+
+func (u *ThisIsASchemaUpdate) WhereByteTypeNotEq(v []byte) *ThisIsASchemaUpdate {
+	u.handler = u.handler.Where(sq.NotEq{"`byteType`": v})
+	u.whereFlag = true
+	return u
+}
+
+func (u *ThisIsASchemaUpdate) WhereByteTypeGt(v []byte) *ThisIsASchemaUpdate {
+	u.handler = u.handler.Where(sq.Gt{"`byteType`": v})
+	u.whereFlag = true
+	return u
+}
+
+func (u *ThisIsASchemaUpdate) WhereByteTypeLt(v []byte) *ThisIsASchemaUpdate {
+	u.handler = u.handler.Where(sq.Lt{"`byteType`": v})
+	u.whereFlag = true
+	return u
+}
+
+func (u *ThisIsASchemaUpdate) WhereByteTypeGtOrEq(v []byte) *ThisIsASchemaUpdate {
+	u.handler = u.handler.Where(sq.GtOrEq{"`byteType`": v})
+	u.whereFlag = true
+	return u
+}
+
+func (u *ThisIsASchemaUpdate) WhereByteTypeLtOrEq(v []byte) *ThisIsASchemaUpdate {
+	u.handler = u.handler.Where(sq.LtOrEq{"`byteType`": v})
+	u.whereFlag = true
+	return u
+}
+
+func (u *ThisIsASchemaUpdate) WhereByteTypeLike(v []byte) *ThisIsASchemaUpdate {
+	u.handler = u.handler.Where(sq.Like{"`byteType`": v})
+	u.whereFlag = true
+	return u
+}
+
+func (u *ThisIsASchemaUpdate) WhereByteTypeIn(args ...[]byte) *ThisIsASchemaUpdate {
+	sb := strings.Builder{}
+	sb.WriteString("`byteType` IN (")
 	for index, v := range args {
 		sb.WriteString(fmt.Sprintf("%v", v))
 		if index < len(args)-1 {

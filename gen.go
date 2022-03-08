@@ -128,12 +128,19 @@ func scan(scanPath string) []*Schema {
 					var typStr string
 					switch field.Type.(type) {
 					case *ast.Ident:
+						// 基本类型
 						typStr = field.Type.(*ast.Ident).Name
 						break
 					case *ast.SelectorExpr:
+						// 非基本类型, 需要用包名点出来的类型
 						tmp := field.Type.(*ast.SelectorExpr)
 						// todo tmp.X的类型也可能需要断言
 						typStr = fmt.Sprintf("%s.%s", tmp.X.(*ast.Ident).Name, tmp.Sel.Name)
+						break
+					case *ast.ArrayType:
+						//数组类型
+						tmp := field.Type.(*ast.ArrayType)
+						typStr = fmt.Sprintf("[]%s", tmp.Elt.(*ast.Ident).Name)
 						break
 					default:
 						continue
