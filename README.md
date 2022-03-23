@@ -1,5 +1,5 @@
 # db-crud-generator
-The tool which was used to auto generating crud codes with the go struct
+This is a tool which was used to auto generating crud codes with the go struct
 
 
 ## Model struct definition
