@@ -100,7 +100,7 @@ func (i *{{$.Name}}Insert) build() error {
 	}
 	for _, argMap := range i.cache {
 		row := make([]interface{}, 0, len(i.cols))
-		for k := range i.cols {
+		for _, k := range cols {
 			v, ok := argMap[k]
 			if !ok {
 				switch k {
