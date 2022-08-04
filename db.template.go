@@ -61,6 +61,7 @@ func (i *{{$.Name}}Insert) build() error {
 		return errors.New("not insert rows")
 	}
 	flag := false
+
 	for _, argMap := range i.cache {
 		row := make([]interface{}, 0, len(argMap))
 		tmpValue, ok := argMap["{{$.ShardCols.SchemaName}}"]
@@ -90,15 +91,16 @@ func (i *{{$.Name}}Insert) build() error {
 	if len(i.cache) <= 0 {
 		return errors.New("not insert rows")
 	}
-	flag := false
 	i.handler = sq.Insert("{{.SchemaName}}")
 
+	cols := make([]string, 0, len(i.cols))
+	for k := range i.cols {
+		cols = append(cols, k)
+		i.handler = i.handler.Columns(fmt.Sprintf("` + "`%s`\"" + `, k))
+	}
 	for _, argMap := range i.cache {
 		row := make([]interface{}, 0, len(i.cols))
 		for k := range i.cols {
-			if !flag {
-				i.handler = i.handler.Columns(fmt.Sprintf("` + "`%s`\"" + `, k))
-			}
 			v, ok := argMap[k]
 			if !ok {
 				switch k {
@@ -110,7 +112,6 @@ func (i *{{$.Name}}Insert) build() error {
 			row = append(row, v)
 		}
 		i.handler = i.handler.Values(row...)
-		flag = true
 	}
 	return nil
 }
